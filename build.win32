@@ -1,0 +1,5 @@
+#!/bin/sh
+
+qmake -o Makefile.msvc x86emu.pro -platform win32-msvc2010
+nmake -f Makefile.msvc clean
+nmake -f Makefile.msvc

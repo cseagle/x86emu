@@ -1,0 +1,6 @@
+#!/bin/sh
+
+qmake -o Makefile.g++ x86emu.pro -platform linux-g++
+gmake -f Makefile.g++ clean
+gmake -f Makefile.g++
+cp ../../../bin/plugins/libx86emu_qt.so.1.0.0 ../../../bin/plugins/x86emu_qt.plx

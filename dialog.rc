@@ -1,0 +1,367 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "WinResrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_EMUDIALOG DIALOGEX 400, 200, 324, 90
+STYLE DS_SETFONT | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "x86 Emulator"
+MENU IDR_IDAMENU
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Step",IDC_STEP,221,7,44,14
+    PUSHBUTTON      "Jump to Cursor",IDC_JUMP_CURSOR,267,23,53,14
+    PUSHBUTTON      "Skip",IDC_SKIP,221,23,44,14
+    PUSHBUTTON      "Run To Cursor",IDC_RUN_TO_CURSOR,267,7,53,14
+    LTEXT           "EAX",IDC_STATIC,20,17,15,8
+    LTEXT           "EBX",IDC_STATIC,20,31,15,8
+    LTEXT           "ECX",IDC_STATIC,20,46,15,8
+    LTEXT           "EDX",IDC_STATIC,19,59,16,8
+    LTEXT           "EBP",IDC_STATIC,116,17,15,8
+    LTEXT           "ESP",IDC_STATIC,116,31,15,8
+    LTEXT           "ESI",IDC_STATIC,119,45,12,8
+    LTEXT           "EDI",IDC_STATIC,118,58,13,8
+    LTEXT           "EIP",IDC_STATIC,119,74,12,8
+    LTEXT           "EFLAGS",IDC_STATIC,7,74,28,8
+    EDITTEXT        IDC_EAX,40,14,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EBX,40,28,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_ECX,40,42,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDX,40,57,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EBP,136,14,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_ESP,136,28,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_ESI,136,42,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDI,136,56,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EIP,136,71,73,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EFLAGS,40,71,73,14,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Registers",IDC_STATIC,3,0,212,86
+    PUSHBUTTON      "Push Data",IDC_PUSH,267,71,53,14
+    PUSHBUTTON      "Segments",IDC_SEGMENTS,267,55,53,14
+    PUSHBUTTON      "Run",IDC_RUN,221,39,44,14
+    PUSHBUTTON      "Set Memory",IDC_SET_MEMORY,221,71,44,14
+    PUSHBUTTON      "Break",IDC_BREAK,267,39,53,14,WS_DISABLED
+END
+
+IDD_MMAP DIALOGEX 0, 0, 157, 100
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "mmap Memory Block"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_MMAP_BASE,19,25,117,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Ok",ID_OK,19,79,50,14
+    PUSHBUTTON      "Cancel",ID_CANCEL,85,79,50,14
+    LTEXT           "Base address (0 for any):",IDC_MESSAGE,7,13,143,8
+    EDITTEXT        IDC_MMAP_SIZE,19,57,117,12,ES_AUTOHSCROLL
+    LTEXT           "Block size:",IDC_MESSAGE2,7,44,143,8
+END
+
+IDD_SEGMENTDIALOG DIALOG 0, 0, 209, 113
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Segment Configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,45,92,50,14
+    EDITTEXT        IDC_CS_REG,22,7,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SS_REG,22,20,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DS_REG,22,33,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ES_REG,22,46,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FS_REG,22,59,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GS_REG,22,72,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CS_BASE,127,7,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SS_BASE,127,20,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DS_BASE,127,33,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ES_BASE,127,46,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FS_BASE,127,59,68,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GS_BASE,127,72,68,13,ES_AUTOHSCROLL
+    LTEXT           "CS",IDC_STATIC,7,9,10,8
+    LTEXT           "SS",IDC_STATIC,7,22,10,8
+    LTEXT           "DS",IDC_STATIC,7,35,11,8
+    LTEXT           "ES",IDC_STATIC,7,48,10,8
+    LTEXT           "FS",IDC_STATIC,7,61,10,8
+    LTEXT           "GS",IDC_STATIC,7,74,11,8
+    LTEXT           "CS base",IDC_STATIC,96,9,28,8
+    LTEXT           "SS base",IDC_STATIC,96,22,28,8
+    LTEXT           "DS base",IDC_STATIC,96,35,28,8
+    LTEXT           "ES base",IDC_STATIC,96,48,28,8
+    LTEXT           "FS base",IDC_STATIC,96,61,27,8
+    LTEXT           "GS base",IDC_STATIC,96,74,28,8
+    PUSHBUTTON      "CANCEL",IDCANCEL,109,92,50,14
+END
+
+IDD_MEMORY DIALOG 0, 0, 169, 124
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Memory Layout"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,22,102,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,91,102,50,14
+    EDITTEXT        IDC_STACKTOP,78,14,70,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_STACKSIZE,78,35,70,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HEAPBASE,78,56,70,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HEAPSIZE,78,77,70,12,ES_AUTOHSCROLL
+    LTEXT           "Stack top address",IDC_STATIC,18,16,58,8
+    LTEXT           "Max stack size",IDC_STATIC,28,37,48,8
+    LTEXT           "Heap base address",IDC_STATIC,14,58,62,8
+    LTEXT           "Max heap size",IDC_STATIC,30,79,46,8
+END
+
+IDD_SET_MEMORY DIALOG 0, 0, 273, 106
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Set Memory Values"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,77,82,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,149,82,50,14
+    LTEXT           "Start address:",IDC_STATIC,7,7,44,8
+    LTEXT           "Space separated values:",IDC_STATIC,7,44,80,8
+    EDITTEXT        IDC_MEM_ADDR,7,19,72,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MEM_VALUES,7,58,258,16,ES_AUTOHSCROLL
+    CONTROL         "8 bit hex",IDC_HEX_BYTES,"Button",BS_AUTORADIOBUTTON,119,16,43,10
+    CONTROL         "16 bit hex",IDC_HEX_WORDS,"Button",BS_AUTORADIOBUTTON,119,29,47,10
+    CONTROL         "32 bit hex",IDC_HEX_DWORDS,"Button",BS_AUTORADIOBUTTON,119,42,47,10
+    CONTROL         "ASCII w/o NULL",IDC_MEM_ASCII,"Button",BS_AUTORADIOBUTTON,197,16,69,10
+    CONTROL         "ASCII w/ NULL",IDC_MEM_ASCIIZ,"Button",BS_AUTORADIOBUTTON,197,29,65,10
+    CONTROL         "Load from file",IDC_MEM_LOADFILE,"Button",BS_AUTORADIOBUTTON,197,42,58,10
+END
+
+IDD_UNEMULATED DIALOGEX 0, 0, 279, 181
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Unemulated Function"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,99,160,50,14
+    EDITTEXT        IDC_RETURN_VALUE,99,113,70,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CLEAR_STACK,99,134,46,14,ES_AUTOHSCROLL
+    CONTROL         "cdecl",IDC_CALL_CDECL,"Button",BS_AUTORADIOBUTTON,201,131,33,10
+    CONTROL         "stdcall",IDC_CALL_STDCALL,"Button",BS_AUTORADIOBUTTON,201,143,36,10
+    LTEXT           "Return type:",IDC_RETURN_LABEL,99,101,153,8
+    LTEXT           "Make stack adjustment",IDC_STATIC,11,134,74,8
+    LISTBOX         IDC_PARM_LIST,3,15,269,82,NOT LBS_NOTIFY | LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_VSCROLL | WS_HSCROLL
+    LTEXT           "Arguments",IDC_STATIC,3,3,34,8
+    LTEXT           "(useful for stdcall)",IDC_STATIC,23,142,56,8
+    LTEXT           "args",IDC_STATIC,147,138,14,8
+    LTEXT           "Specify return value eax = ",IDC_STATIC,11,116,84,10
+    GROUPBOX        "Calling Convention",IDC_STATIC,183,119,72,39
+END
+
+IDD_SWITCH_THREAD DIALOG 0, 0, 178, 95
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Manage threads"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Switch",IDOK,7,74,35,14
+    PUSHBUTTON      "Cancel",IDCANCEL,135,74,35,14
+    LTEXT           "Current threads",IDC_STATIC,7,7,49,8
+    LISTBOX         IDC_THREAD_LIST,7,23,164,45,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "Destroy",ID_DESTROY,71,74,35,14
+END
+
+IDD_INPUTDIALOG DIALOG 0, 0, 249, 79
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Data Entry"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_DATA,20,32,206,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Ok",ID_OK,66,58,50,14
+    PUSHBUTTON      "Cancel",ID_CANCEL,132,58,50,14
+    LTEXT           "Enter your data:",IDC_MESSAGE,20,13,206,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_EMUDIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 86
+    END
+
+    IDD_MMAP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 150
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 93
+    END
+
+    IDD_SEGMENTDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 202
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+
+    IDD_MEMORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 162
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 117
+    END
+
+    IDD_SET_MEMORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 266
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 99
+    END
+
+    IDD_UNEMULATED, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 272
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 174
+    END
+
+    IDD_SWITCH_THREAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_INPUTDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 72
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_IDAMENU MENU
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Dump...",                     IDC_DUMP
+        MENUITEM "Dump embedded PE",            IDC_DUMP_PE
+        MENUITEM SEPARATOR
+        MENUITEM "Close",                       IDC_HIDE
+    END
+    POPUP "Edit"
+    BEGIN
+        MENUITEM "Stack",                       IDC_EDITSTACK
+        MENUITEM "Segment Registers...",        IDC_SEGMENTS
+    END
+    POPUP "View"
+    BEGIN
+        MENUITEM "Enumerate Heap",              IDC_HEAP_LIST
+        MENUITEM "Reset",                       IDC_RESET
+    END
+    POPUP "Emulate"
+    BEGIN
+        MENUITEM "Settings",                    IDC_SETTINGS
+        MENUITEM "Set breakpoint...",           IDC_BREAKPOINT
+        MENUITEM "Remove breakpoint...",        IDC_CLEARBREAK
+        MENUITEM "Switch thread...",            IDC_SWITCH
+        POPUP "Windows"
+        BEGIN
+            MENUITEM "Auto hook",                   IDC_AUTOHOOK, CHECKED
+            MENUITEM "Load entire library file...", IDC_LOADLIB
+            MENUITEM "Set import addr save point",  IDC_GPA
+            POPUP "Throw exception"
+            BEGIN
+                MENUITEM "Memory Access",               IDC_MEMEX
+                MENUITEM "Breakpoint",                  IDC_BKPTEX
+                MENUITEM "Divide by zero",              IDC_DIVEX
+                MENUITEM "Debug",                       IDC_DEBUGEX
+            END
+            MENUITEM "Export lookup...",            IDC_EXPORT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Track fetched bytes",         IDC_TRACK
+        MENUITEM "Trace execution",             IDC_TRACE
+        MENUITEM "Log library calls",           IDC_LOGLIB, CHECKED
+        MENUITEM "Break on exceptions",         ID_EMULATE_BREAKONEXCEPTIONS, CHECKED
+    END
+    POPUP "Functions"
+    BEGIN
+        MENUITEM "Allocate heap block...",      IDC_HEAP_BLOCK
+        MENUITEM "Allocate stack block...",     IDC_STACK_BLOCK
+        MENUITEM "Allocate mmap block...",      IDC_MMAP_BLOCK
+        POPUP "Push"
+        BEGIN
+            MENUITEM "Push main args",              ID_PUSH_PUSHMAINARGS
+            MENUITEM "Push WinMain args",           ID_PUSH_PUSHWINMAINARGS
+            MENUITEM "Push DllMain args",           ID_PUSH_PUSHDLLMAINARGS
+        END
+    END
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

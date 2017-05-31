@@ -1,0 +1,410 @@
+* 4/15/14
+  Fixed issues with "Set Memory" asociated with conversion of QTextField contents to 
+  ascii strings. Basic implementation for memory access faults. Added menu option to
+  make pause on exception optional. Fixed bug in emulation of LAHF.
+
+* 1/4/14
+  Updated for compatibility with Ida 6.5 SDK. Visual Studio builds (Ida <= 5.7) now use
+  VS 2010+. Added color highlighting for register changes while stepping.
+
+* 4/27/13
+  Added emulations for LocalRealloc, LocalLock, LocakUnlock, FreeLibrary
+  Better handling for empty name tables in DLLs
+  Derive fake name for functions that are exported by ordinal only
+
+* 3/30/13
+  Fixed bug when saving and restoring emulation heap state.
+  Added HeapBase::sizeOf function to query size of an allocated block
+  Added emulation for GetStdHandle, GetStartupInfo, GetWindowsDirectory, GetSystemDirectory
+  Initial emulation for GetCPInfo, WideCharToMultiByte, MultiByteToWideChar, GetStringType, LCMapString
+  Added feature to load additional Windows dlls into existing database.
+
+* 3/1/13
+  Added FPU state update for many more FPU instructions
+  Fixed problem of failing to run/trace when resuming from 
+  an existing breakpoint
+
+* 01/24/13
+  Added build for Ida64
+  Release version 1.0.7
+
+* 01/09/13
+  Updated code for Ida 6.4 compatibility. Added build for Ida64
+  Release version 1.0.6
+
+* 12/11/10
+  Fixed bug in 16 bit address mode decoding pointed out by Rafal Cyran
+  Release version 1.0.5
+  
+* 11/23/10
+  Fixed behavior of cmovXX instruction.
+  Implemented cmpxchg instruction.
+  Fixed bug in MOV seg, reg
+  
+* 11/02/10
+  Released version 1.0.4 of the emulator. This is a bug fix release.
+  Fixed crash resulting from failure to unhook notification in some
+  circumstances.  Fixed problem in which emulator failed to properly
+  reformat code at eip.
+
+* 11/01/10
+  Released version 1.0.3 of the emulator. This is a bug fix release.
+  Corrects problems with Visual Studio project files.
+
+* 10/19/10
+  Released version 1.0.2 of the emulator. This is a bug fix release.
+  Fixed problems encountered when opening new vs. old files which
+  may or may not have contained existing emulator state.
+
+* 10/18/10
+  Released version 1.0.1 of the emulator. This is a bug fix release.
+  Changed emulator window attributes so that it remains on top of
+  Ida window on Linux and OS X.
+  Emulator menu bar changed to a tool bar since OS X does not use 
+  menus the same way that Windows and Linux use menus.
+  Fixed long standing state saving issue by adding PLUGIN_PROC flag
+  to plugin enabling catching of savefile notification on close.
+
+* 10/17/10
+  Released version 1.0.0 of the emulator.
+  The graphical interface for the emulator has been ported to Qt
+  and the emulator now runs in full graphics mode on the Windows,
+  Linux, and OS X versions of idaq.
+
+* 09/20/10
+  Emulator initialization loads .rsrc section if not already loaded
+  Changed format of saved emulator information.  CHANGES ARE NOT 
+  BACKWARD COMPATIBLE WITH PREVIOUS VERSIONS OF EMULATOR.
+
+* 09/19/10
+  Added many new emulated Windows functions
+  Improved emulation of PEB/TEB fields
+  Added support for Windows Vectored Exception Handlers
+  Changed Makefile to support MinGW/MSYS
+  Eliminated error condition in initialization of Windows Crypto
+
+* 08/20/10
+  Added changes from Frank Boldewin to fix compilation under
+  Visual Studio 2008.
+  Fixed bug in flag setting for shifts
+
+* 02/15/10
+  Added emulation for GetThreadContext
+  Stopped attempting to open a stack windows in IDA 5.2
+  Changes to CONTEXT handling code to help with GetThreadContext
+  Fixed crash that happens if user closes Ida View-Stack
+
+* 01/01/10
+  Updates for compatibility with SDK 5.6
+
+* 12/07/09
+  On initialization, zero fill sections that occupy zero disk space
+  but non-zero virtual space (like .bss)
+  
+* 11/26/09
+  Fixed failure to recognize SEH return at RET N instruction
+
+* 11/25/09
+  Added EmuTrace to run the emulator without updating displays
+  Fixed bug in pe header loading code
+  Implemented more Windows API function emulations  
+
+* 11/17/09
+  Added additional support for basic scripting of the emulator.
+     EmuTraceOne - step a single instruction without updating displays
+     EmuSync - update the emulator displays
+  Changed segment handling to setup fs register to point to TEB by
+  default (PE files only).
+
+* 11/02/09
+  Fixed bug in BSF implementation
+  Added an mmap option to the functions menu
+  Implemented more Windows API functions
+  
+* 10/14/09
+  Implement BSR/BSF
+  
+* 09/14/09
+  Fixed problem with initialization of PEB_LR_DATA lists
+
+* 08/24/09
+  Improved handling of stack display window.  Use change notifications
+  to decide when to update the display.
+
+* 08/23/09
+  Added handler for UD2
+
+* 08/22/09
+  Begin implementation of improved ELF process startup for
+  more realistic construction of env and arg vectors.
+  Reintroduced MemMgr for better handling of VirtualAlloc by
+  mapping IDA sections for each VirtualAlloc (and eventually mmap)
+  request.
+
+* 08/21/09
+  Implement more of the windows PEB, specifically improved 
+  implementation of PEB_LDR_DATA and LDR_MODULE
+
+* 08/20/09
+  Open an additional IdaView as a stack viewer
+
+* 08/11/09
+  Release of version 0.9.6
+
+* 07/31/09
+  Corrected import table parsing issue introduced on 05/02/09
+
+* 05/02/09
+  Improved parsing of PE import tables
+
+* 04/29/09
+  Implemented a number of mmx/sse2 instruction emulations
+
+* 04/27/09
+  Added sse2 (xmm) register set and support for save and restore of fpu
+  and sse2 state in the database.
+
+* 04/23/09
+  Added more support for floating point operations including fadd, fsub,
+  fdiv, fmul, fabs, fiadd, fisub, fimul, fidiv
+
+* 04/15/09
+  Added a number of emulations for additional Windows library functions
+  Added more support for floating point operations including fcos and fsin
+  Fixed bug in stack setup that cause two dwords to be pushed on the stack
+  evey time the emulator loaded
+
+* 01/05/09
+  Added emulation for the CMOVcc instructions
+
+* 01/03/09
+  Added emulation for the XADD instruction
+
+* 10/22/08
+  Fixed bug in stack growth algorithm that resulted in NULL pointer
+  deref when the stack grew beyond its initial 4k allocation.
+  Thanks to Paolo Palumbo for pointing this out.
+  
+* 09/07/08
+  Added initial support for basic scripting of the emulator.  When the
+  emulator is loaded, it now registers 4 new IDC functions:
+     EmuStepOne - step a single instruction
+     EmuRun - run the emulator until a breakpoint is hit
+     EmuGetReg(long regnum) - read the value of the specified register
+     EmuSetReg(long regnum, long val) - set the value of the specified
+                                        register
+     Register constants are described in x86emu.idc
+
+* 08/13/08
+  Fixed problem with make file where resources were not getting linked
+  into the plugin.  Initial implementation of fldz and fnstenv
+
+* 07/27/08
+  Revised make file and moved it to Makefile. makefile.gcc
+  has been removed.
+
+* 07/03/08
+  Added behavior for AF flag and set IF flag on by default.
+  Fixed use of qstrncat that prevented compiling in IDA 4.7
+  Added privilege mask for eflags and popf.
+  Implemented 0F 1F NOP.
+  Thanks to Kris Kaspersky for pointing these things out.
+  
+* 04/24/08
+  Restored functionality to unemulated function dialog that was broken by
+  a previous update.  Fucntion parameter types and names are once again
+  displayed when available.  If a parameter is a string pointer, then 
+  the string value is also displayed in the dialog.
+ 
+* 01/08/08
+  Added logic to check whether eip is pointing into a dll before executing
+  each instruction.  If it is, then we assume that a direct jump to a dll
+  function has been made and that the return address is sitting on top of
+  the stack.  The address is popped and doCall is called to handle the 
+  situation.
+  
+* 11/14/07
+  Improved PE header loading/parsing.  Initial implementation of 
+  PEB_LDR_DATA construct in TEB.  Keep debug flags clear in PEB.
+
+* 11/09/07
+  Start on building emulated TEB and PEB for PE binaries.  fsBase register
+  set accordingly.  Place reasonable pointer into Kernel32.dll on top of
+  stack during initialization.  Fixed bug where address override prefix
+  was being ignored.
+ 
+* 9/03/07
+  Added code to read legacy stack and heap structures from older versions
+  of the emulator.  Still will not read per thread stacks which only 
+  affects databases for which multiple threads had been created.
+  
+* 8/24/07
+  Complete rearchitecting of stack/heap handling.  The stack and heap are
+  now mapped to Ida segments to allow for better visibility of those memory
+  regions.
+
+* 7/05/07
+  Incorporated Jeremy Cooper's bit rotation patch
+  
+* 9/02/06
+  Fixed problem with import by ordinal.  ordinal base value was not being
+  subtracted.  Added proper checking for optional .dll extension in calls
+  to LoadLibrary and GetModuleHandle.
+  
+* 6/07/06
+  Added logic to check for thunk/jump funcs to dll functions.
+  Ensure that a segment is created for the iat.  Ida doesn't always create
+  an iat when the iat falls in a non-standard section such as .rsrc 
+
+* 5/09/06
+  Redesign of import table handling. Emulator no searches for dlls on disk
+  and loads the headers for any referenced dlls along with their export 
+  directories.  Additionally, the emulator ensures that the import name table
+  from the original binary is loaded and does lookup against the loaded
+  export directories to resolve and set IAT address.  The emulator no longer
+  makes any calls to the GetProcAddress, LoadLibrary, or GetModuleHandle.
+  Release of version 0.9.3
+
+* 5/06/06
+  Improved handling of import tables.
+  Emulator now creates header sections and loads headers for PE and ELF
+  binaries.
+  Release of version 0.9.2
+  Added conditional compilation code for compatibility back to SDK46
+  
+* 3/13/06
+  Added heap info dump.  All chunk addresses and sizes can be dumped 
+  to message window.
+  Generated makefile (x86Emulator.mak) for Visual Studio users to 
+  build from command line.
+  
+* 01/27/06
+  Added support for bit test/set/reset/compliment operations
+  
+* 01/01/06
+  Initial support for threads
+  
+* 12/21/05
+  New exception handling architecture
+  
+* 12/06/05
+  Release of version 0.8
+
+* 12/01/05
+  Added GUI functionality to write user supplied data to any memory
+  location the emulator know about.  This includes ida space, and the
+  emulated stack and heap space.
+  
+  Fixed bug in heap allocator logic.
+
+* 11/29/05
+  Changed heap implementation to allow for multiple heaps.  Added emulations
+  for Windows heap functions GetProcessHeap, HeapCreate, HeapDestroy, 
+  HeapAlloc, and HeapFree.
+  
+* 11/24/05
+  Fixed implementation of mov reg, seg and mov seg, reg.  Fixed in/out to 
+  fetch proper number of bytes but make no other state changes.
+  
+* 11/22/05
+  Added reverse lookup capability to map function addresses to their exported
+  name in loaded Windows dlls.  Added popup dialog box whenever a call is made
+  to an unemulated library function from a Windows exe.
+  
+* 11/21/05
+  Moved linking code so that it runs on pluging initiation rather than file
+  load.  Automatically loads modules that were previously loaded, skips modules
+  that are being faked.  Tests all function calls to see if they call to a 
+  loaded module.  If they do, a reverse lookup is done from the function call
+  address to the corresponding function name via the dll export table and 
+  the function is hooked automatically.
+  
+* 11/20/05
+  For Windows PE files, parse import table on initial load. Use actual module
+  handles. Use actual return values from GetProcAddress.  Offer user the
+  chance to call LoadLibrary, or generate fake handle for unloaded modules.
+  Automatically hooks all imported functions that it has emulations for.
+  Compiles for SDK 4.9
+  
+* 07/12/05
+  Finally activated the state saving code that has been sitting dormant for a
+  while.  Thanks to Jeremy Cooper for the netnode manipulation code and input
+  on the state saving code in general.
+  
+* 07/08/05
+  Implemented BSWAP instruction
+  
+* 07/04/05
+  Fix for MOV problem reported by daineng
+  Addition of makefile.gcc to allow compiling with cygwin
+  
+* 04/04/05
+  Changes to compile with SDK480
+
+* 11/08/04
+  Changes to stack display logic
+
+  Implemented breakpoints
+
+  Added manual exception generation
+
+* 10/07/04
+  Menu reorganization
+  
+  Main Dialog box resized and reorganized
+
+  Added the ability to automatically regenerate an import table by specifying
+  the instruction responsible for storing the results of calls to 
+  GetProcAddress.  This is called the GetProcAddress "save point" and when 
+  encountered the emulator names the location after the last function looked
+  up in a call to GetProcAddress. Set via Emulate/Windows/Set GPA save point
+
+* 10/06/04
+  Fixed incorrect REP prefix testing for MOVS, LODS, and STOS
+
+  Added code to increment EDI and ESI during INS and OUT respectively though
+  no data is moved during the instruction
+
+* 08/17/04
+   Fixed hook function combo box behavior.
+
+   Changes to hooking data structures to support GetProcAddress emulation
+
+   Added basic emulated implementations of GetProcAddress, GetModuleHandle,
+   and LoadLibrary.  Each reports how they are called to the message window
+   and generates a unique return value for use later function calls. 
+
+   GetProcAddress automatically creates hooks wherever possible.
+
+   Changed setup to include a default heap at startup.
+
+* 08/15/04
+   Fixed MOVZX behavior
+
+   Implemented a formerly unimplemented IMUL instruction (0F AF)
+   
+* 07/26/04
+   Changed function hooking behavior.  Hooks are now based on destination
+   (i.e. hooked function) address rather than call location.  Now, hooking
+   a function once properly hooks it for all calls to that function.
+
+* 07/04/04
+   Activated SEH functionality.  Plugin now detects loaded file type 
+   (pe or elf) and activates SEH if type is pe.  Also does a little 
+   better initial stack setup based on file type.  Plugin currently
+   generates SEH exception frames for INT3, single stepping with TRAP
+   flag, use of Debug registers 0-3/7 and division by zero.
+   
+* 07/02/04
+   Added Scc functionality.
+   
+* 04/10/2004
+   Minor change to project options to clear up warning messages generated 
+   during build under SDK460SP1
+   
+* 04/06/2004
+   Corrected behavior of sbb.
+
+* 04/03/2004
+   Incorporated memory manager code with proof of concept function call 
+   hooking.
