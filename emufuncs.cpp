@@ -5071,7 +5071,7 @@ unsigned int cgc_fdwait(int nfds, unsigned int readfds, unsigned int writefds,
 #else
       switch (errno) {
          case EBADF:
-            res = CGC_BADF;
+            res = CGC_EBADF;
             break;
          case EINVAL:
             res = CGC_EINVAL;
