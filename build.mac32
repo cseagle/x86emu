@@ -3,4 +3,4 @@
 qmake -o Makefile.clang x86emu.pro -platform macx-clang-32
 make -f Makefile.clang clean
 make -f Makefile.clang
-cp ../../../bin/plugins/libx86emu_qt.1.0.0.dylib ../../../bin/plugins/x86emu_qt.pmc
+cp ../../bin/plugins/libx86emu_qt.1.0.0.dylib ../../bin/plugins/x86emu_qt.pmc

@@ -3,4 +3,4 @@
 qmake -o Makefile64.g++ x86emu64.pro -platform linux-g++
 gmake -f Makefile64.g++ clean
 gmake -f Makefile64.g++
-cp ../../../bin/plugins/libx86emu_qt.so.1.0.0 ../../../bin/plugins/x86emu_qt.plx64
+cp ../../bin/plugins/libx86emu_qt.so.1.0.0 ../../bin/plugins/x86emu_qt.plx64
