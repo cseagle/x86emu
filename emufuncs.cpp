@@ -4685,7 +4685,7 @@ void save_cgc_rand_state() {
 bool restore_cgc_rand_state() {
    netnode rn("$ cgc rand");
    rn.create("$ cgc rand");
-   unsigned int sz = sizeof(prng);
+   size_t sz = sizeof(prng);
    bool res = rn.getblob(&prng, &sz, 0, 'B') != NULL;
    sz = sizeof(cgc_negotiator);
    return res & (rn.getblob(&cgc_negotiator, &sz, 0x100, 'B') != NULL);
