@@ -12,12 +12,12 @@ macx:IDA_APP = "/Applications/IDA\ Pro\ $$(IDA_VERSION)/idaq.app/Contents"
 
 #Need to change the following to your Qt install location
 macx: {
-   greaterThan($$QT_MAJOR_VERSION, 4): QT_LOC = /Users/qt-5.4.1/5.4/clang_64/lib
-   lessThan($$QT_MAJOR_VERSION, 5): QT_LOC = /usr/local/qt/lib
+   greaterThan(QT_MAJOR_VERSION, 4):QT_LOC = /Users/qt-5.4.1/5.4/clang_64/lib
+   lessThan(QT_MAJOR_VERSION, 5):QT_LOC = /usr/local/qt/lib
    QT_TAIL = .framework/Versions/$$QT_MAJOR_VERSION/Headers
    #create our own list of Qt modules
    MODS = QtGui QtCore
-   greaterThan($$QT_MAJOR_VERSION, 4): MODS += QtWidgets
+   greaterThan(QT_MAJOR_VERSION, 4):MODS += QtWidgets
 }
 
 defineReplace(makeIncludes) {
@@ -34,7 +34,7 @@ defineReplace(makeIncludes) {
 TEMPLATE = lib
 
 #QT += core gui
-greaterThan($$QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
 CONFIG += qt dll
 
