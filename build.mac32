@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -z "$1" ]l then
+if [ -z "$1" ]; then
    echo "missing qt mkspec argument (macx-g++ or macx-clang-32)"
    exit
 fi
