@@ -1,6 +1,6 @@
 #!/bin/sh
 
-qmake -o Makefile64.clang x86emu64.pro -platform macx-clang-32
-make -f Makefile64.clang clean
-make -f Makefile64.clang
+qmake -o Makefile.mac64 x86emu64.pro -platform macx-clang-32
+make -f Makefile.mac64 clean
+make -f Makefile.mac64
 cp ../../bin/plugins/libx86emu_qt.1.0.0.dylib ../../bin/plugins/x86emu_qt.pmc64
