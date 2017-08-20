@@ -64,7 +64,11 @@
 #include <typeinf.hpp>
 #include <nalt.hpp>
 #include <segment.hpp>
+#if IDA_SDK_VERSION >= 700
+#include <segregs.hpp>
+#else
 #include <srarea.hpp>
+#endif
 #include <typeinf.hpp>
 #include <struct.hpp>
 #include <entry.hpp>
@@ -100,8 +104,13 @@
 void memoryAccessException();
 
 #if IDA_SDK_VERSION >= 530
+#if IDA_SDK_VERSION >= 700
+TWidget *mainForm;
+TWidget *stackCC;
+#else
 TForm *mainForm;
 TCustomControl *stackCC;
+#endif
 #else
 #define SEGMOD_SILENT 0
 #define SEGMOD_KEEP 0
@@ -167,7 +176,7 @@ static netnode personality_node(personality_node_name);
 static netnode heap_node(heap_node_name);
 
 //will contain base address for loaded image.  Use with RVAs
-IMAGE_NT_HEADERS nt;
+IMAGE_NT_HEADERS32 nt;
 unsigned int peImageBase;
 
 //set to true if saved emulator state is found
@@ -195,7 +204,11 @@ static bool ok_to_run = false;
 #endif
 static bool already_run = false;
 
+#if IDA_SDK_VERSION >= 700
+bool idaapi run(size_t);
+#else
 void idaapi run(int);
+#endif
 
 //tracking and tracing enable
 bool doTrace = false;
@@ -222,7 +235,11 @@ extern til_t *ti;
 
 bool isWindowCreated = false;
 
+#if IDA_SDK_VERSION >= 700
+static ssize_t idaapi idpCallback(void * cookie, int code, va_list va);
+#else
 static int idaapi idpCallback(void * cookie, int code, va_list va);
+#endif
 
 void getRandomBytes(void *buf, unsigned int len) {
 #ifdef __NT__
@@ -619,7 +636,7 @@ void dumpEmbededPE() {
       showErrorMessage(buf);
       return;
    }
-   unsigned int sectionBase = pebase + sizeof(IMAGE_NT_HEADERS);
+   unsigned int sectionBase = pebase + sizeof(IMAGE_NT_HEADERS32);
    unsigned int lastSection = sectionBase + (numSections - 1) * sizeof(IMAGE_SECTION_HEADER);
    unsigned int sectionOffset = get_long(lastSection + 20);
    unsigned int sectionSize = get_long(lastSection + 16);
@@ -628,7 +645,7 @@ void dumpEmbededPE() {
 
 bool isStringPointer(const char *type_str) {
    bool result = false;
-   int len = strlen(type_str);
+   int len = (int)strlen(type_str);
    char *buf = (char*)malloc(len + 1);
    char *p = buf;
    while (*type_str) {
@@ -877,7 +894,7 @@ bool loadLibrary() {
       FILE *f = qfopen(szFile, "rb");
       if (f) {
          IMAGE_DOS_HEADER dos;
-         IMAGE_NT_HEADERS nt;
+         IMAGE_NT_HEADERS32 nt;
          IMAGE_SECTION_HEADER *sect;
          if (qfread(f, &dos, sizeof(dos)) != sizeof(dos) || dos.e_magic != 0x5A4D ||
              qfseek(f, dos.e_lfanew, SEEK_SET) != 0 ||
@@ -1294,7 +1311,11 @@ void trace() {
 // At the moment this is only used to catch the "saving" event
 // so that the plug-in can save its state in the database.
 //
+#if IDA_SDK_VERSION >= 700
+static ssize_t idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
+#else
 static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
+#endif
    switch (code) {
       case ui_saving: {
          //
@@ -1497,9 +1518,13 @@ static void loadBaseCommon() {
 // At the moment this is only used to catch the "saving" event
 // so that the plug-in can save its state in the database.
 //
+#if IDA_SDK_VERSION >= 700
+static ssize_t idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
+#else
 static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
+#endif
    switch (code) {
-   case processor_t::newfile: {
+   case processor_t::ev_newfile: {
       //
       // a new database has been opened
       //
@@ -1509,14 +1534,18 @@ static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
       loadBaseCommon();
       break;
    }
+#if IDA_SDK_VERSION < 700
    case processor_t::closebase: {
+#else
+   case idb_event::closebase: {
+#endif
 #ifdef DEBUG
       msg(PLUGIN_NAME": closebase notification\n");
 #endif
       clearFunctionInfoList();
       break;
    }
-   case processor_t::oldfile: {
+   case processor_t::ev_oldfile: {
       if (netnode_exist(module_node)) {
          // There's a module_node in the database.  Attempt to
          // instantiate the module info list from it.
@@ -1728,7 +1757,7 @@ void doExportLookup() {
       char *exp = reverseLookupExport(export_addr);
       if (exp) {
 //                     msg("x86emu: reverseLookupExport: %s\n", exp);
-         int len = 20 + strlen(exp);
+         int len = 20 + (int)strlen(exp);
          char *mesg = (char*)qalloc(len);
          ::qsnprintf(mesg, len, "0x%08X: %s", export_addr, exp);
          showInformationMessage("Export Lookup", mesg);
@@ -1850,7 +1879,7 @@ unsigned int PELoadHeaders() {
       }
 //      msg("petable_node does not exist yet\n");
 
-      IMAGE_NT_HEADERS nt;
+      IMAGE_NT_HEADERS32 nt;
       unsigned int pe_offset = get_long(addr + 0x3C);
 
       get_many_bytes(addr + pe_offset, &nt, sizeof(nt));
@@ -1879,7 +1908,7 @@ unsigned int PELoadHeaders() {
       if (f) {
          msg("Reading PE headers from exe file\n");
          IMAGE_DOS_HEADER *dos;
-         IMAGE_NT_HEADERS *nt;
+         IMAGE_NT_HEADERS32 *nt;
          IMAGE_SECTION_HEADER *sect;
          addr = (unsigned int)s.startEA;
          unsigned int need = (unsigned int)s.endEA - addr;
@@ -1888,7 +1917,7 @@ unsigned int PELoadHeaders() {
          fread(buf, 1, need, f);
          dos = (IMAGE_DOS_HEADER*)buf;
 
-         nt = (IMAGE_NT_HEADERS*)(buf + dos->e_lfanew);
+         nt = (IMAGE_NT_HEADERS32*)(buf + dos->e_lfanew);
          sect = (IMAGE_SECTION_HEADER*)(nt + 1);
 
          pe.setBase(nt->OptionalHeader.ImageBase);
@@ -2142,7 +2171,7 @@ char *replace(char *var, const char *match, const char *sub) {
    while ((find = strstr(var, match)) != NULL) {
       *find = 0;
       find += strlen(match);
-      int len = strlen(var) + strlen(sub) + strlen(find) + 1;
+      int len = (int)(strlen(var) + strlen(sub) + strlen(find) + 1);
       res = (char*)qalloc(len);
       ::qsnprintf(res, len, "%s%s%s", var, sub, find);
       qfree(var);
@@ -2187,7 +2216,11 @@ Buffer *makeLinuxEnv(const char *env[], const char *userName, const char *hostNa
 
 //notification hook function for idb notifications
 #if IDA_SDK_VERSION >= 510      //HT_IDB introduced in SDK 510
+#if IDA_SDK_VERSION >= 700
+ssize_t idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
+#else
 int idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
+#endif
    if (notification_code == idb_event::byte_patched) {
       // A byte has been patched
       // in: ea_t ea
@@ -2198,11 +2231,19 @@ int idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
          unsigned int val = get_long(ea);
          segment_t *seg = getseg(val);
          if (seg) {
+#if IDA_SDK_VERSION >= 700
+            qstring name;
+            ssize_t s = get_nice_colored_name(&name, val, GNCN_NOCOLOR);
+            if (s != 0) {
+               set_cmt(ea, name.c_str(), false);
+            }
+#else
             char name[256];
             ssize_t s = get_nice_colored_name(val, name, sizeof(name), GNCN_NOCOLOR);
             if (s != 0) {
                set_cmt(ea, name, false);
             }
+#endif
          }
          else {
             set_cmt(ea, "", false);
@@ -2284,10 +2325,10 @@ unsigned int createWindowsPEB() {
    const char *userName = "Administrator";
    const char *hostName = "localhost";
    Buffer *env = makeEnv(win_xp_env, userName, hostName);
-   unsigned int len = env->get_wlen();
+   size_t len = env->get_wlen();
    unsigned char *eb = env->get_buf();
-   unsigned int env_buf = HeapBase::getHeap()->malloc(len * 2);
-   for (unsigned int i = 0; i < len; i++) {
+   ea_t env_buf = HeapBase::getHeap()->malloc((unsigned int)len * 2);
+   for (size_t i = 0; i < len; i++) {
       patch_word(env_buf + 2 * i, eb[i]);
    }
    delete env;
@@ -2299,7 +2340,7 @@ unsigned int createWindowsPEB() {
    //command line needs to be pointed to by UNICODE_STRING at proc_parms + 0x40
    //need interface to accept command line from user
    const char *cmdLine = "dummy";
-   int cmdLineLen = strlen(cmdLine) + 1;
+   int cmdLineLen = (int)strlen(cmdLine) + 1;
    unsigned int cmd_line = HeapBase::getHeap()->malloc(cmdLineLen * 2);
    //copy command line to this location as WCHAR
    for (int i = 0; i < cmdLineLen; i++) {
@@ -2333,7 +2374,7 @@ unsigned int createWindowsPEB() {
    get_root_filename(buf, sizeof(buf));
    window = buf;
 #endif
-   unsigned int ulen = strlen(window) + 1;
+   unsigned int ulen = (unsigned int)strlen(window) + 1;
    unsigned int pWindow = HeapBase::getHeap()->malloc(ulen * 2);
    //copy desktop line to this location as WCHAR
    for (unsigned int i = 0; i < ulen; i++) {
@@ -2347,8 +2388,8 @@ unsigned int createWindowsPEB() {
    patch_long(proc_parms + SIZEOF_PROCESS_PARAMETERS, pWindow + ulen * 2);
 
    //DesktopInfo
-   char *desktop = "Winsta0\\Default";
-   ulen = strlen(desktop) + 1;
+   const char *desktop = "Winsta0\\Default";
+   ulen = (unsigned int)strlen(desktop) + 1;
    unsigned int pDesktop = HeapBase::getHeap()->malloc(ulen * 3);
    //copy desktop line to this location as WCHAR
    for (unsigned int i = 0; i < ulen; i++) {
@@ -2557,12 +2598,12 @@ void buildElfArgs() {
       char **arg = mainArgs;
       while (*arg) argc++;
       while (argc--) {
-         int len = strlen(mainArgs[argc]) + 1;
+         int len = (int)strlen(mainArgs[argc]) + 1;
          put_many_bytes(esp - len, mainArgs[argc], len);
          esp -= len;
       }
    }
-   int len = strlen(fname) + 1;
+   int len = (int)strlen(fname) + 1;
    put_many_bytes(esp - len, fname, len);
    esp -= len;
    //add other environment strings
@@ -2584,11 +2625,11 @@ void buildElfEnvironment(unsigned int elf_base) {
    const char *userName = "test";
    const char *hostName = "localhost";
    Buffer *env = makeLinuxEnv(linux_env, userName, hostName);
-   unsigned int env_len = env->get_wlen();
+   unsigned int env_len = (unsigned int)env->get_wlen();
    char *eb = (char*)env->get_buf();
    //find PWD
    char *pwd = NULL;
-   for (unsigned int i = 0; i < (env_len - 4); i++) {
+   for (size_t i = 0; i < (env_len - 4); i++) {
       if (strncmp(eb + i, "PWD=", 4) == 0) {
          pwd = eb + i + 4;
          break;
@@ -2600,7 +2641,7 @@ void buildElfEnvironment(unsigned int elf_base) {
    }
 
    push(0, SIZE_DWORD);
-   int len = strlen(fname) + 1;
+   int len = (int)strlen(fname) + 1;
    esp -= len;
    unsigned int fileName = esp;
    put_many_bytes(esp, fname, len);
@@ -2863,11 +2904,19 @@ void idaapi term(void) {
 //
 //
 
+#if IDA_SDK_VERSION >= 700
+bool idaapi run(size_t /*arg*/) {
+#else
 void idaapi run(int /*arg*/) {
+#endif
    if (!ok_to_run) {
       //need to wait for ui_ready_to_run
       wants_to_run = true;
+#if IDA_SDK_VERSION >= 700
+      return true;
+#else
       return;
+#endif
    }
    cacheMainWindowHandle();
    if (!isWindowCreated) {
@@ -3121,7 +3170,11 @@ void idaapi run(int /*arg*/) {
       pCmdLineA = (unsigned int)x86emu_node.altval(EMU_COMMAND_LINE);
 
 #if IDA_SDK_VERSION >= 530
+#if IDA_SDK_VERSION >= 700
+      TWidget *stackForm = open_disasm_window("Stack");
+#else
       TForm *stackForm = open_disasm_window("Stack");
+#endif
       switchto_tform(stackForm, true);
       stackCC = get_current_viewer();
       mainForm = find_tform("IDA View-A");
@@ -3140,6 +3193,9 @@ void idaapi run(int /*arg*/) {
    }
    already_run = true;
    check_auto_cgc();
+#if IDA_SDK_VERSION >= 700
+   return true;
+#endif
 }
 
 //--------------------------------------------------------------------------

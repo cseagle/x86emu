@@ -65,9 +65,11 @@
 #include <ctype.h>
 #include <stdint.h>
 
+/*
 #ifdef PACKED
 #undef PACKED
 #endif
+*/
 
 #include "x86emu_ui.h"
 #include "cpu.h"
@@ -84,6 +86,7 @@
 #include "cgc_syscalls.h"
 #include "ansi_cprng.h"
 
+#include <pro.h>
 #include <kernwin.hpp>
 #include <bytes.hpp>
 #include <name.hpp>
@@ -155,7 +158,8 @@ bool is_cgc_pov = false;
 #define _SOCKET int
 #define closesocket close
 #else
-#define _SOCKET unsigned int
+#define _SOCKET SOCKET
+//unsigned int
 #endif
 
 static _SOCKET cgc_sock = SOCKET_ERROR;
@@ -347,7 +351,7 @@ _SOCKET connect_to(const char *host, short port) {
       hostent *he = gethostbyname(host);
       if (he == NULL) {
          msg(PLUGIN_NAME": Unable to resolve name: %s\n", host);
-         return INVALID_SOCKET;
+         return (_SOCKET)INVALID_SOCKET;
       }
       server.sin_addr = *(in_addr*) he->h_addr;
    }
@@ -356,7 +360,7 @@ _SOCKET connect_to(const char *host, short port) {
       if (connect(sock, (sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
          msg(PLUGIN_NAME": Failed to connect to server.\n");
          closesocket(sock);
-         sock = INVALID_SOCKET;
+         sock = (_SOCKET)INVALID_SOCKET;
       }
       msg("done with connect, client: 0x%x\n", sock);
    }
@@ -380,7 +384,7 @@ _SOCKET accept_from(const char *host, short port) {
       hostent *he = gethostbyname(host);
       if (he == NULL) {
          msg(PLUGIN_NAME": Unable to resolve name: %s\n", host);
-         return INVALID_SOCKET;
+         return (_SOCKET)INVALID_SOCKET;
       }
       server.sin_addr = *(in_addr*) he->h_addr;
    }
@@ -389,19 +393,19 @@ _SOCKET accept_from(const char *host, short port) {
       if (bind(sock, (sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
          msg(PLUGIN_NAME": Failed to bind to address.\n");
          closesocket(sock);
-         sock = INVALID_SOCKET;
+         sock = (_SOCKET)INVALID_SOCKET;
       }
       else if (listen(sock, 5) == SOCKET_ERROR) {
          msg(PLUGIN_NAME": Failed set listen on socket.\n");
          closesocket(sock);
-         sock = INVALID_SOCKET;
+         sock = (_SOCKET)INVALID_SOCKET;
       }
       else {
          _SOCKET client;
          client = accept(sock, NULL, NULL);
          if (client == SOCKET_ERROR) {
             closesocket(sock);
-            sock = INVALID_SOCKET;
+            sock = (_SOCKET)INVALID_SOCKET;
          }
          else {
             closesocket(sock);
@@ -429,7 +433,7 @@ char *checkModuleExtension(char *module) {
    if (module == NULL) return NULL;
    char *result = module;
    char *dot = strchr(module, '.');
-   int len = strlen(module);
+   int len = (int)strlen(module);
    if (dot == NULL) {
       int newlen = len + 5;
       result = (char*)realloc(module, newlen);
@@ -665,7 +669,7 @@ bool cmp_c_to_dbuni(char *cstr, unsigned int uni) {
 }
 
 unsigned int allocateUnicodeString(const char *str) {
-   int len = strlen(str);
+   int len = (int)strlen(str);
    unsigned int ustr = HeapBase::getHeap()->malloc(len * 2 + 2);
    unsigned int uni = HeapBase::getHeap()->malloc(8);  //sizeof(UNICODE_STRING)
 
@@ -813,7 +817,7 @@ static int loadString(int which, char *dir, int len) {
    if (len) {
       *dir = 0;
    }
-   return x86emu_node.supstr(which, dir, len);
+   return (int)x86emu_node.supstr(which, dir, len);
 #else
    return -1;
 #endif
@@ -847,7 +851,7 @@ int GetSystemDirectory(char *dir, int size) {
          dllDir[0] = 0;
       }
    }
-   int len = strlen(dllDir);
+   int len = (int)strlen(dllDir);
    ::qstrncpy(dir, dllDir, size);
    return len;
 }
@@ -3192,7 +3196,7 @@ void emu_NtQuerySystemInformation(unsigned int /*addr*/) {
                writeMem(pSystemInformation + 4 + i * sizeof(SYSTEM_MODULE) + 26,
                         0, SIZE_WORD);
                patch_many_bytes(pSystemInformation + 4 + i * sizeof(SYSTEM_MODULE) + 28,
-                        hl->moduleName, strlen(hl->moduleName) + 1);
+                        hl->moduleName, (unsigned int)strlen(hl->moduleName) + 1);
             }
          }
          if (pReturnLength) {
@@ -3663,7 +3667,7 @@ unsigned int myGetProcAddress(unsigned int hModule, unsigned int lpProcName) {
    if (lpProcName < 0x10000) {
       //getting function by ordinal value
       char *dot;
-      int len = strlen(m->moduleName) + 16;
+      int len = (int)strlen(m->moduleName) + 16;
       procName = (char*) malloc(len);
       ::qsnprintf(procName, len, "%s_0x%4.4X", m->moduleName, lpProcName);
       dot = strchr(procName, '.');
@@ -3816,7 +3820,7 @@ void makeImportLabel(unsigned int addr, unsigned int val) {
       char *name = reverseLookupExport(val);
       if (name && !set_name(addr, name, SN_NOCHECK | SN_NOWARN)) { //failed, probably duplicate name
          //add numeric suffix until we find an available name
-         int nlen = strlen(name) + 32;
+         int nlen = (int)strlen(name) + 32;
          char *newName = (char*)malloc(nlen);
          int idx = 0;
          while (1) {
@@ -4193,7 +4197,7 @@ char *reverseLookupExport(unsigned int addr) {
    //            msg("x86emu: reverseLookupExport: %X == %s\n", addr, fname);
             }
             else {
-               int len = strlen(hl->moduleName) + 16;
+               int len = (int)strlen(hl->moduleName) + 16;
                fname = (char*) malloc(len);
                ::qsnprintf(fname, len, "%s_0x%4.4X", hl->moduleName, idx + hl->ordinal_base);
                char *dot = strchr(fname, '.');
@@ -4268,7 +4272,7 @@ char *getFunctionPrototype(FunctionInfo *f) {
    if (f && f->ftype.is_func()) {
       //parse tinf to create prototype
       result = _strdup(buf);
-      int len = strlen(result) + 3 + strlen(f->fname);
+      int len = (int)strlen(result) + 3 + (int)strlen(f->fname);
       result = (char*)realloc(result, len);
       qstrncat(result, " ", len);
       qstrncat(result, f->fname, len);
@@ -4280,14 +4284,14 @@ char *getFunctionPrototype(FunctionInfo *f) {
          tinfo_t arginf = f->ftype.get_nth_arg(i);
          arginf.print(&type_str);
          ::qstrncpy(buf, type_str.c_str(), sizeof(buf));
-         len = strlen(result) + 3 + strlen(buf);
+         len = (int)strlen(result) + 3 + (int)strlen(buf);
          result = (char*)realloc(result, len);
          if (i) {
             qstrncat(result, ",", len);
          }
          qstrncat(result, buf, len);
       }
-      len = strlen(result) + 2;
+      len = (int)strlen(result) + 2;
       result = (char*)realloc(result, len);
       qstrncat(result, ")", len);
    }
@@ -4343,7 +4347,7 @@ char *getFunctionPrototype(FunctionInfo *f) {
          print_type_to_one_line(buf, sizeof(buf), ti, info.rettype.c_str());
       }
       result = _strdup(buf);
-      int len = strlen(result) + 3 + strlen(f->fname);
+      int len = (inr)strlen(result) + 3 + (int)strlen(f->fname);
       result = (char*)realloc(result, len);
       qstrncat(result, " ", len);
       qstrncat(result, f->fname, len);
@@ -4352,14 +4356,14 @@ char *getFunctionPrototype(FunctionInfo *f) {
       for (unsigned int i = 0; i < f->stackItems; i++) {
          //change to incorporate what we know from Ida
          print_type_to_one_line(buf, sizeof(buf), NULL, info[i].type.c_str());
-         len = strlen(result) + 3 + strlen(buf);
+         len = (int)strlen(result) + 3 + (int)strlen(buf);
          result = (char*)realloc(result, len);
          if (i) {
             qstrncat(result, ",", len);
          }
          qstrncat(result, buf, len);
       }
-      len = strlen(result) + 2;
+      len = (int)strlen(result) + 2;
       result = (char*)realloc(result, len);
       qstrncat(result, ")", len);
    }
@@ -4430,7 +4434,7 @@ char *getFunctionPrototype(FunctionInfo *f) {
          print_type_to_one_line(buf, sizeof(buf), ti, rettype);
       }
       result = _strdup(buf);
-      int len = strlen(result) + 3 + strlen(f->fname);
+      int len = (int)strlen(result) + 3 + (int)strlen(f->fname);
       result = (char*)realloc(result, len);
       qstrncat(result, " ", len);
       qstrncat(result, f->fname, len);
@@ -4443,14 +4447,14 @@ char *getFunctionPrototype(FunctionInfo *f) {
       for (unsigned int i = 0; i < f->stackItems; i++) {
          //change to incorporate what we know from Ida
          print_type_to_one_line(buf, sizeof(buf), NULL, types[i]);
-         len = strlen(result) + 3 + strlen(buf);
+         len = (int)strlen(result) + 3 + (int)strlen(buf);
          result = (char*)realloc(result, len);
          if (i) {
             qstrncat(result, ",", len);
          }
          qstrncat(result, buf, len);
       }
-      len = strlen(result) + 2;
+      len = (int)strlen(result) + 2;
       result = (char*)realloc(result, len);
       qstrncat(result, ")", len);
       if (f->stackItems) {
@@ -4510,7 +4514,7 @@ void saveFunctionInfo(Buffer &b) {
    for (f = functionInfoList; f; f = f->next) count++;
    b.write(&count, sizeof(count));
    for (f = functionInfoList; f; f = f->next) {
-      count = strlen(f->fname) + 1;  //account for null
+      count = (int)strlen(f->fname) + 1;  //account for null
       b.write(&count, sizeof(count));
       b.write(f->fname, count);  //note this writes the null
       b.write(&f->result, sizeof(f->result));
@@ -4544,9 +4548,14 @@ void loadFunctionInfo(Buffer &b) {
 }
 
 void init_til(const char *tilFile) {
+#if IDA_SDK_VERSION >= 700
+   qstring errbuf;
+   ti = load_til(tilFile, &errbuf);
+#else
    char err[256];
    *err = 0;
 #if IDA_SDK_VERSION < 695
+
 #if IDA_SDK_VERSION < 470
    char *tilpath = get_tilpath();
 #elif IDA_SDK_VERSION < 695
@@ -4556,6 +4565,7 @@ void init_til(const char *tilFile) {
    ti = load_til(tilpath, tilFile, err, sizeof(err));
 #else
    ti = load_til2(tilFile, err, sizeof(err));
+#endif
 #endif
 }
 
@@ -4642,7 +4652,7 @@ bool cgc_global_init(const char *seed, const char *nseed, const char *host,
    is_cgc_pov = bin_type == 0;
    if (strlen(seed) != 96 || !ishex(seed)) {
       warning("Invalid execution seed");
-      msg("strlen = %d\n", strlen(seed));
+      msg("strlen = %d\n", (int)strlen(seed));
       return false;
    }
    hex2bin(hex_seed, seed);
@@ -4871,7 +4881,7 @@ unsigned int cgc_transmit(unsigned int fd, unsigned int buf, unsigned int len, u
       size_t tb;
       res = cgc_negotiator.write(buf, len, &tb);
       if (res == 0) {
-         len = tb;
+         len = (unsigned int)tb;
       }
    }
    else {
@@ -4913,7 +4923,7 @@ unsigned int cgc_receive(unsigned int fd, unsigned int buf, unsigned int len, un
       size_t rb;
       res = cgc_negotiator.read(buf, len, &rb);
       if (res == 0) {
-         len = rb;
+         len = (unsigned int)rb;
       }
    }
    else {

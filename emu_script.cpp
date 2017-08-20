@@ -28,6 +28,21 @@
 typedef value_t idc_value_t;
 #endif
 
+#if IDA_SDK_VERSION >= 700
+
+bool set_idc_func_ex(const char *name, idc_func_t *fp, const char *args, int extfunc_flags) {
+   ext_idcfunc_t func;
+   func.name = name;
+   func.fptr = fp;
+   func.args = args;
+   func.defvals = NULL;
+   func.ndefvals = 0;
+   func.flags = extfunc_flags;
+   return add_idc_func(func);
+}
+
+#endif
+
 /*
  * prototypes for functions in x86emu.cpp that we use
  * to implement some of the scripted behavior

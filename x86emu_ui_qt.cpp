@@ -270,7 +270,7 @@ void argCallback(const char * /*func*/, const char *arg, int idx, void *user) {
    ud->parm_list->addItem(arg);
 
    if (doLogLib) {
-      int len = strlen(arg);
+      int len = (int)strlen(arg);
       if (arg[len - 1] == '\'') {
          const char *s = strchr(arg, '\'');
          size_t flen = strlen(ud->functionCall) + strlen(s) + 5;

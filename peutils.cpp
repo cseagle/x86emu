@@ -51,6 +51,8 @@
 #include "peutils.h"
 #include "sdk_versions.h"
 
+#include "x86defs.h"
+
 #ifndef DEBUG
 //#define DEBUG 1
 #endif
@@ -318,7 +320,7 @@ void PETables::buildThunks(FILE *f) {
             return;
          }
          if (desc.Name < min_rva) min_rva = desc.Name;
-         if (desc.Name > max_rva) max_rva = desc.Name + strlen(tr->dll_name) + 1;
+         if (desc.Name > max_rva) max_rva = desc.Name + (int)strlen(tr->dll_name) + 1;
          while (1) {
             tr->iat = (unsigned int*)realloc(tr->iat, (tr->iat_size + 1) * sizeof(unsigned int));
             if (tr->iat == NULL) {
@@ -352,7 +354,7 @@ void PETables::buildThunks(FILE *f) {
             msg("read import name %s\n", n);
 #endif
             if (name_rva < min_rva) min_rva = name_rva;
-            if (name_rva > max_rva) max_rva = name_rva + strlen(n) + 1;
+            if (name_rva > max_rva) max_rva = name_rva + (int)strlen(n) + 1;
             free(n);
          }
       }

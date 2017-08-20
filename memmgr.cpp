@@ -22,7 +22,11 @@
 
 #include <ida.hpp>
 #include <idp.hpp>
+#if IDA_SDK_VERSION >= 700
+#include <segregs.hpp>
+#else
 #include <srarea.hpp>
+#endif
 #include <segment.hpp>
 
 #include <stdint.h>

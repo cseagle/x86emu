@@ -21,6 +21,8 @@
 #ifndef __BUFFER_H
 #define __BUFFER_H
 
+#include <stddef.h>
+
 #define BUFFER_MAGIC 0x861DA000
 #define BUFFER_MAGIC_MASK 0xFFFFF000
 #define VERSION(n) (BUFFER_MAGIC | n)
@@ -29,18 +31,18 @@ class Buffer {
 public:
    Buffer();
    Buffer(unsigned int magic);
-   Buffer(unsigned char *buf, unsigned int len);
+   Buffer(unsigned char *buf, size_t len);
    ~Buffer();
    
-   int read(void *data, unsigned int len);
-   bool rewind(unsigned int amt);
-   int write(const void *data, unsigned int len);
+   int read(void *data, size_t len);
+   bool rewind(size_t amt);
+   int write(const void *data, size_t len);
    int readString(char **str);
    int writeString(const char *str);
    
    unsigned char *get_buf();
-   unsigned int get_wlen();
-   unsigned int get_rlen();
+   size_t get_wlen();
+   size_t get_rlen();
    bool has_error() {return error;};
    void reset_error() {error = false;};
    unsigned int getMagic() {return magic;};
@@ -48,14 +50,14 @@ public:
 
 private:
    Buffer(const Buffer & /*b*/) {};
-   int check_size(unsigned int max);
-   void init(unsigned int size);
+   int check_size(size_t max);
+   void init(size_t size);
    
    unsigned int magic;
    unsigned char *bptr;
-   unsigned int rptr;
-   unsigned int wptr;
-   unsigned int sz;
+   size_t rptr;
+   size_t wptr;
+   size_t sz;
    bool error;
 };
 

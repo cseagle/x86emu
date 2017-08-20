@@ -34,7 +34,7 @@ Buffer::Buffer(unsigned int magic) {
    write(&magic, sizeof(magic));
 }
 
-Buffer::Buffer(unsigned char *buf, unsigned int len) {
+Buffer::Buffer(unsigned char *buf, size_t len) {
    init(len);
    if (!error) {
       if (len >= 4) {  //check for presence of BUFFER_MAGIC
@@ -50,7 +50,7 @@ Buffer::Buffer(unsigned char *buf, unsigned int len) {
    wptr = sz;
 }
 
-void Buffer::init(unsigned int size) {
+void Buffer::init(size_t size) {
    bptr = (unsigned char *)malloc(size);
    sz = bptr ? size : 0;
    rptr = wptr = 0;
@@ -62,7 +62,7 @@ Buffer::~Buffer() {
    free(bptr);
 }
 
-int Buffer::read(void *data, unsigned int len) {
+int Buffer::read(void *data, size_t len) {
    if ((rptr + len) <= sz) {
       memcpy(data, bptr + rptr, len);
       rptr += len;
@@ -72,7 +72,7 @@ int Buffer::read(void *data, unsigned int len) {
    return 1;
 }
 
-bool Buffer::rewind(unsigned int amt) {
+bool Buffer::rewind(size_t amt) {
    if (rptr >= amt) {
       rptr -= amt;
       return true;
@@ -80,7 +80,7 @@ bool Buffer::rewind(unsigned int amt) {
    return false;
 }
 
-int Buffer::write(const void *data, unsigned int len) {
+int Buffer::write(const void *data, size_t len) {
    if (!check_size(wptr + len)) {
       memcpy(bptr + wptr, data, len);
       wptr += len;
@@ -91,7 +91,7 @@ int Buffer::write(const void *data, unsigned int len) {
 }
 
 int Buffer::readString(char **str) {
-   unsigned int len;
+   size_t len;
    if (read(&len, sizeof(len)) == 0) {
       *str = (char*)malloc(len);
       if (*str && read(*str, len) == 0) return 0;
@@ -102,7 +102,7 @@ int Buffer::readString(char **str) {
 }
 
 int Buffer::writeString(const char *str) {
-   unsigned int len = strlen(str) + 1;
+   size_t len = strlen(str) + 1;
    if (write(&len, sizeof(len)) == 0) {
       return write(str, len);
    }
@@ -114,15 +114,15 @@ unsigned char *Buffer::get_buf() {
    return bptr;
 }
 
-unsigned int Buffer::get_wlen() {
+size_t Buffer::get_wlen() {
    return wptr;
 }
 
-unsigned int Buffer::get_rlen() {
+size_t Buffer::get_rlen() {
    return rptr;
 }
 
-int Buffer::check_size(unsigned int max) {
+int Buffer::check_size(size_t max) {
 	if (max <= sz) return 0;
 	max = (max + BLOCK_SIZE) & ~(BLOCK_SIZE - 1);   //round up to next BLOCK_SIZE
 	unsigned char *tmp = (unsigned char *)realloc(bptr, max);

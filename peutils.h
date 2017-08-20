@@ -29,6 +29,9 @@ struct _IMAGE_NT_HEADERS;
 struct _IMAGE_SECTION_HEADER;
 struct _IMAGE_EXPORT_DIRECTORY;
 
+typedef struct _IMAGE_NT_HEADERS IMAGE_NT_HEADERS32;
+typedef struct _IMAGE_SECTION_HEADER IMAGE_SECTION_HEADER;
+
 //IMAGE_NT_HEADERS.FileHeader.Characteristics dw offset 4 + 0x12 = 0x16 = 22
 //exe will have the following set
 #define _IMAGE_FILE_EXECUTABLE_IMAGE 2
@@ -71,8 +74,8 @@ public:
    ~PETables();
    unsigned int rvaToFileOffset(unsigned int rva);
    void setBase(unsigned int b) {base = b;};
-   void setNtHeaders(_IMAGE_NT_HEADERS *inth);
-   void setSectionHeaders(unsigned int nsecs, _IMAGE_SECTION_HEADER *ish);
+   void setNtHeaders(IMAGE_NT_HEADERS32 *inth);
+   void setSectionHeaders(unsigned int nsecs, IMAGE_SECTION_HEADER *ish);
    void buildThunks(FILE *f);
    void destroy();
    void loadTables(Buffer &b);
@@ -80,8 +83,8 @@ public:
    
    unsigned int valid;
    unsigned int base;
-   _IMAGE_NT_HEADERS *nt;
-   _IMAGE_SECTION_HEADER *sections;
+   IMAGE_NT_HEADERS32 *nt;
+   IMAGE_SECTION_HEADER *sections;
    unsigned short num_sections;
    thunk_rec *imports;
 };
@@ -91,8 +94,8 @@ struct DllList {
    unsigned int handle;
    unsigned int id;
    unsigned int maxAddr;
-   _IMAGE_NT_HEADERS *nt;
-   _IMAGE_SECTION_HEADER *sections;
+   IMAGE_NT_HEADERS32 *nt;
+   IMAGE_SECTION_HEADER *sections;
    _IMAGE_EXPORT_DIRECTORY *exportdir;
    unsigned int NoF;  //NumberOfFunctions
    unsigned int NoN;  //NumberOfNames

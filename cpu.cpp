@@ -395,7 +395,7 @@ int saveState(netnode &f) {
             // Convert the output blob object into a buffer and
             // store it in the database node.
             //
-            unsigned int hsz = hb.get_wlen();
+            unsigned int hsz = (unsigned int)hb.get_wlen();
          //   msg("x86emu: writing blob of size %d.\n", sz);
             hbuf = hb.get_buf();
             hn.setblob(hbuf, hsz, 0, 'B');
@@ -438,7 +438,7 @@ int saveState(netnode &f) {
       // Convert the output blob object into a buffer and
       // store it in the database node.
       //
-      sz = b.get_wlen();
+      sz = (unsigned int)b.get_wlen();
    //   msg("x86emu: writing blob of size %d.\n", sz);
       buf = b.get_buf();
 /*
@@ -6054,12 +6054,20 @@ int executeInstruction() {
    cpu.initial_eip = cpu.eip;
 //   msg("Start of instruction: %x\n", cpu.eip);
    if (doTrace) {
-      char lbuf[1024];
       traceLog("0x%08x:  ", instStart);
+#if IDA_SDK_VERSION >= 700
+      qstring lbuf;
+      if (generate_disasm_line(&lbuf, instStart, GENDSM_FORCE_CODE)) {
+         tag_remove(&lbuf, lbuf);
+         traceLog("%s\n", lbuf.c_str());
+      }
+#else
+      char lbuf[1024];
       if (generate_disasm_line(instStart, lbuf, sizeof(lbuf), GENDSM_FORCE_CODE)) {
          tag_remove(lbuf, lbuf, sizeof(lbuf));
          traceLog("%s\n", lbuf);
       }
+#endif
       else {
          traceLog("\n");
       }
