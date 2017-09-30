@@ -3,7 +3,7 @@
 #or absolute
 SDK = ../..
 
-OBJECTS_DIR = p64-7
+OBJECTS_DIR = p32-7
 
 #Need to change the following to your Ida install location
 linux-g++:IDA_APP = /opt/ida-$$(IDA_VERSION)
@@ -40,7 +40,7 @@ INCLUDEPATH += $${SDK}/include
 
 DESTDIR = $${SDK}/bin/plugins
 
-DEFINES += __IDP__ __QT__ __EA64__ __X64__
+DEFINES += __IDP__ __QT__ __X64__
 win32:DEFINES += __NT__ WIN32
 win32:DEFINES -= UNICODE
 win32:DEFINES += _CRT_SECURE_NO_WARNINGS
@@ -53,14 +53,14 @@ win32-msvc2013: {
    exists( $${SDK}/lib/vc.w64/ida.lib ) {
       LIBS += -L$${SDK}/lib/vc.w64
    } else {
-      LIBS += -L$${SDK}/lib/x64_win_vc_64
+      LIBS += -L$${SDK}/lib/x64_win_vc_32
       LIBS += -L$${SDK}/lib/x64_win_qt
    }
    QMAKE_LFLAGS_RPATH =
    QMAKE_LIBDIR_QT =
 }
-linux-g++:LIBS += -L$${IDA_APP} -lida64
-macx:LIBS += -L$${IDA_APP}/MacOs -lida64
+linux-g++:LIBS += -L$${IDA_APP} -lida
+macx:LIBS += -L$${IDA_APP}/MacOs -lida
 
 #don't let qmake force search any libs other than the
 #ones that ship with Ida
@@ -128,4 +128,4 @@ win32:TARGET_EXT=.dll
 linux-g++:TARGET_EXT=.so
 macx:TARGET_EXT=.dylib
 
-TARGET = x86emu_qt64
+TARGET = x86emu_qt

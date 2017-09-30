@@ -862,15 +862,15 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		C:\Qt\5.4.1\qtbase\include\QtWidgets\qactiongroup.h \
 		C:\Qt\5.4.1\qtbase\src\widgets\kernel\qactiongroup.h \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -878,10 +878,11 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		x86emu_ui.h \
 		x86emu_ui_qt.h
-	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1600 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2010 -I"C:/Program Files (x86)/IdaPro/idasdk695/plugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk695/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
+	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1600 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2010 -I"C:/Program Files (x86)/IdaPro/idasdk70/plugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk70/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -1552,15 +1553,15 @@ p32\x86emu.obj: x86emu.cpp image.h \
 		C:\Qt\5.4.1\qtbase\include\QtWidgets\qactiongroup.h \
 		C:\Qt\5.4.1\qtbase\src\widgets\kernel\qactiongroup.h \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -1568,12 +1569,13 @@ p32\x86emu.obj: x86emu.cpp image.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		..\..\include\auto.hpp \
 		..\..\include\loader.hpp \
 		..\..\include\typeinf.hpp \
 		..\..\include\name.hpp \
-		..\..\include\srarea.hpp \
+		..\..\include\segregs.hpp \
 		..\..\include\struct.hpp \
 		..\..\include\entry.hpp \
 		emufuncs.h \
@@ -2281,15 +2283,15 @@ p32\x86emu_ui_qt.obj: x86emu_ui_qt.cpp C:\Qt\5.4.1\qtbase\include\QtCore\QtGloba
 		C:\Qt\5.4.1\qtbase\src\widgets\widgets\qpushbutton.h \
 		C:\Qt\5.4.1\qtbase\include\QtWidgets\QAction \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2297,6 +2299,7 @@ p32\x86emu_ui_qt.obj: x86emu_ui_qt.cpp C:\Qt\5.4.1\qtbase\include\QtCore\QtGloba
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		x86emu_ui.h \
 		..\..\include\auto.hpp \
@@ -2318,12 +2321,12 @@ p32\emufuncs.obj: emufuncs.cpp ..\..\include\pro.h \
 		cpu.h \
 		x86defs.h \
 		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2331,6 +2334,7 @@ p32\emufuncs.obj: emufuncs.cpp ..\..\include\pro.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		context.h \
 		emufuncs.h \
@@ -2349,15 +2353,15 @@ p32\emufuncs.obj: emufuncs.cpp ..\..\include\pro.h \
 
 p32\cpu.obj: cpu.cpp cpu.h \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2365,6 +2369,7 @@ p32\cpu.obj: cpu.cpp cpu.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		seh.h \
 		context.h \
@@ -2381,8 +2386,8 @@ p32\cpu.obj: cpu.cpp cpu.h \
 p32\emuheap.obj: emuheap.cpp ..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\range.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\ua.hpp \
 		..\..\include\kernwin.hpp \
 		..\..\include\lines.hpp \
@@ -2398,17 +2403,18 @@ p32\emuheap.obj: emuheap.cpp ..\..\include\ida.hpp \
 		..\..\include\fpro.h \
 		..\..\include\funcs.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h
 
 p32\memmgr.obj: memmgr.cpp ..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2416,7 +2422,8 @@ p32\memmgr.obj: memmgr.cpp ..\..\include\ida.hpp \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
-		..\..\include\srarea.hpp \
+		..\..\include\config.hpp \
+		..\..\include\segregs.hpp \
 		memmgr.h \
 		x86defs.h \
 		sdk_versions.h \
@@ -2425,15 +2432,15 @@ p32\memmgr.obj: memmgr.cpp ..\..\include\ida.hpp \
 
 p32\seh.obj: seh.cpp cpu.h \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2441,6 +2448,7 @@ p32\seh.obj: seh.cpp cpu.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		seh.h \
 		context.h \
@@ -2449,12 +2457,12 @@ p32\seh.obj: seh.cpp cpu.h \
 p32\break.obj: break.cpp ..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2462,21 +2470,22 @@ p32\break.obj: break.cpp ..\..\include\ida.hpp \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		..\..\include\dbg.hpp \
 		..\..\include\idd.hpp \
 		x86defs.h \
 		sdk_versions.h
 
 p32\hooklist.obj: hooklist.cpp x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2484,6 +2493,7 @@ p32\hooklist.obj: hooklist.cpp x86defs.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		hooklist.h \
 		buffer.h
@@ -2491,15 +2501,15 @@ p32\hooklist.obj: hooklist.cpp x86defs.h \
 p32\buffer.obj: buffer.cpp buffer.h
 
 p32\emuthreads.obj: emuthreads.cpp x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2507,6 +2517,7 @@ p32\emuthreads.obj: emuthreads.cpp x86defs.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		emuthreads.h \
 		cpu.h \
@@ -2521,7 +2532,7 @@ p32\peutils.obj: peutils.cpp image.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\segment.hpp \
 		..\..\include\ida.hpp \
-		..\..\include\area.hpp \
+		..\..\include\range.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
@@ -2533,23 +2544,25 @@ p32\peutils.obj: peutils.cpp image.h \
 		..\..\include\ua.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		..\..\include\name.hpp \
 		..\..\include\diskio.hpp \
 		..\..\include\loader.hpp \
 		peutils.h \
 		buffer.h \
-		sdk_versions.h
+		sdk_versions.h \
+		x86defs.h
 
 p32\emu_script.obj: emu_script.cpp ..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\range.hpp \
 		..\..\include\expr.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2557,6 +2570,7 @@ p32\emu_script.obj: emu_script.cpp ..\..\include\ida.hpp \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		cpu.h \
 		x86defs.h \
 		sdk_versions.h \
@@ -2564,15 +2578,15 @@ p32\emu_script.obj: emu_script.cpp ..\..\include\ida.hpp \
 
 p32\context.obj: context.cpp cpu.h \
 		x86defs.h \
-		..\..\include\ida.hpp \
 		..\..\include\pro.h \
 		..\..\include\llong.hpp \
+		..\..\include\ida.hpp \
+		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
-		..\..\include\area.hpp \
 		..\..\include\funcs.hpp \
 		..\..\include\bytes.hpp \
 		..\..\include\lines.hpp \
@@ -2580,6 +2594,7 @@ p32\context.obj: context.cpp cpu.h \
 		..\..\include\kernwin.hpp \
 		..\..\include\xref.hpp \
 		..\..\include\bitrange.hpp \
+		..\..\include\config.hpp \
 		sdk_versions.h \
 		context.h
 

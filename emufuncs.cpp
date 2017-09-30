@@ -861,7 +861,10 @@ int GetSystemDirectory(char *dir, int size) {
 int getSystemDllDirectory(char *dir, int size) {
    int len = getSavedDllDir(dir, size);
    if (len == -1) {
-      len = GetSystemDirectory(dir, size);
+      len = GetSystemWow64Directory(dir, size); //IDA 7.0 and later are 64 bit so we need to look for 32-bit libraries
+      if (len == 0) {
+         len = GetSystemDirectory(dir, size);
+      }
       if (len > 0) {
          saveDllDir(dir);
       }
@@ -4805,7 +4808,7 @@ uint32_t negotiator::read(uint32_t buf, uint32_t len, size_t *rb) {
                closed = true;
                goto done;
             }
-            get_bytes(&prng, (uint8_t*)tx_vals, 2 * sizeof(uint32_t));
+            get_prng_bytes(&prng, (uint8_t*)tx_vals, 2 * sizeof(uint32_t));
             tx_vals[0] &= rx_vals[1];
             tx_vals[1] &= rx_vals[2];
             msg("Type 1 required values: 0x%08x | 0x%08x\n", tx_vals[0], tx_vals[1]);
@@ -5175,7 +5178,7 @@ unsigned int cgc_random(unsigned int buf, unsigned int count, unsigned int rnd_b
    if (rnd == NULL) {
       return CGC_EINVAL;
    }
-   get_bytes(&prng, rnd, count);
+   get_prng_bytes(&prng, rnd, count);
    patch_many_bytes(buf, rnd, count);
    qfree(rnd);
    if (rnd_bytes) {

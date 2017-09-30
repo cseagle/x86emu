@@ -1364,7 +1364,7 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
 #if IDA_SDK_VERSION >= 520
       case ui_ready_to_run:
          //try to prevent run from running before GUI is ready
-         //msg("ui_ready_to_run handled\n");
+         msg("ui_ready_to_run handled\n");
          if (!ok_to_run) {
             ok_to_run = true;
             if (wants_to_run) {
@@ -2825,7 +2825,7 @@ bool haveHeapSegment() {
 int idaapi init(void) {
    cpuInit = false;
 
-   if (strcmp(inf.procName, "metapc")) return PLUGIN_SKIP;
+//   if (strcmp(inf.procName, "metapc")) return PLUGIN_SKIP;
    if (ph.id != PLFM_386) return PLUGIN_SKIP;
 
 //   msg(PLUGIN_NAME": hooking idp\n");

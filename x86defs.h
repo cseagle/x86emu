@@ -126,19 +126,34 @@ typedef int int32_t;
 
 #define put_many_bytes(a, b, s) put_bytes(a, b, s)
 #define patch_many_bytes(a, b, s) patch_bytes(a, b, s)
-#define get_many_bytes(a, b, s) get_bytes(a, b, s)
+#define get_many_bytes(a, b, s) get_bytes(b, s, a)
 
 #define do_data_ex(a, d, s, t) create_data(a, d, s, t)
 #define doDwrd(a, l) create_dword(a, l)
 #define doStruct(a, l, t) create_struct(a, l, t)
 
-#define dwrdflag dwordflag
+#define dwrdflag dword_flag
 
 #define isEnabled(a) is_mapped(a)
 #define isLoaded(a) is_loaded(a)
 
 #define switchto_tform(w, f) activate_widget(w, f)
 #define find_tform(c) find_widget(c)
+
+#define get_long(a) get_dword(a)
+#define patch_long(a, v) patch_dword(a, v)
+#define put_long(a, v) put_dword(a, v)
+
+#define get_segreg(a, r) get_sreg(a, r)
+#define set_default_segreg_value(s, r, v) set_default_sreg_value(s, r, v) 
+
+#define AskUsingForm_c ask_form
+#define askbuttons_c ask_buttons
+
+#define alt1st altfirst
+#define altnxt altnext
+#define sup1st supfirst
+#define supnxt supnext
 
 #else
 
@@ -155,6 +170,23 @@ typedef int int32_t;
 
 #define set_func_start func_setstart 
 #define set_func_end func_setend
+
+#define get_dword(a) get_long(a)
+#define patch_dword(a, v) patch_long(a, v)
+#define put_dword(a, v) put_long(a, v)
+
+#define get_sreg(a, r) get_segreg(a, r)
+#define set_default_sreg_value(s, r, v) set_default_segreg_value(s, r, v) 
+
+#define altfirst alt1st
+#define altnext  altnxt
+#define supfirst sup1st
+#define supnext  supnxt
+
+#define get_bytes(b, s, a) get_many_bytes(a, b, s)
+
+#define ask_form AskUsingForm_c
+#define ask_buttons askbuttons_c
 
 #endif
 

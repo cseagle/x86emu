@@ -17,7 +17,7 @@ struct cprng_ctx {
 };
 
 int ctx_init(cprng_ctx *ctx, unsigned char *seed, unsigned int slen);
-int get_bytes(cprng_ctx *ctx, unsigned char *buf, unsigned int nbytes);
+int get_prng_bytes(cprng_ctx *ctx, unsigned char *buf, unsigned int nbytes);
 #define is_valid(ctx) (ctx->flags == CPRNG_VALID)
 
 #endif

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+qmake -o Makefile32-7.msvc x86emu32-7.pro -platform win32-msvc2013
+nmake -f Makefile32-7.msvc clean
+nmake -f Makefile32-7.msvc

@@ -115,7 +115,8 @@ bool breakOnExceptions = true;
 
 int doEscape();
 
-#ifndef CYGWIN
+#ifdef _MSC_VER
+#if _MSC_VER <= 1600
 // was added to work under Microsoft Visual Studio
 long double remainderl(long double fpZero, long double fpOne) {
    return fpZero - (floor(fpZero / fpOne) * fpOne);
@@ -125,6 +126,7 @@ long double remainderl(long double fpZero, long double fpOne) {
 long double roundl(long double fpZero) {
    return floor(fpZero);
 }
+#endif
 #endif
 
 void fpuInit() {

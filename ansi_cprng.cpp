@@ -98,7 +98,7 @@ static int _get_more_bytes(cprng_ctx *ctx) {
    return 0;
 }
 
-int get_bytes(cprng_ctx *ctx, uint8_t *buf, uint32_t nbytes) { 
+int get_prng_bytes(cprng_ctx *ctx, uint8_t *buf, uint32_t nbytes) { 
    if (ctx->flags == CPRNG_INVALID) {
       return -1;
    }
