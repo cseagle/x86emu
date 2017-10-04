@@ -1,3 +1,6 @@
+* 10/2/17
+  Update source for IDA SDK 7.0
+  
 * 4/15/14
   Fixed issues with "Set Memory" asociated with conversion of QTextField contents to 
   ascii strings. Basic implementation for memory access faults. Added menu option to
