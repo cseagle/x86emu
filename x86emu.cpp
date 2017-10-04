@@ -147,14 +147,6 @@ union FILETIME {
 
 FILETIME baseTime;
 
-// The magic number for verifying the database blob
-static const int X86EMU_BLOB_MAGIC = 0x4D363858;  // "X86M"
-
-//The version number with which to tag the data in the
-//database storage node
-static const int X86EMU_BLOB_VERSION_MAJOR = 0;
-static const int X86EMU_BLOB_VERSION_MINOR = 1;
-
 //The node name to use to identify the plug-in's storage
 //node in the IDA database.
 static const char x86emu_node_name[] = "$ X86 CPU emulator state";
@@ -1440,14 +1432,16 @@ void check_auto_cgc() {
       char tfile[1024];
       ssize_t tf_size = cgc_nn.supstr(CGC_TRACE_FILE_SUPVAL, tfile, sizeof(tfile));
       if (tf_size > 0) {
-         msg("Opening cgc trace: %s\n", traceFile);
+         msg("Opening cgc trace: %s\n", tfile);
          openTraceFile(tfile);
          setTracing(true);
       }
       nodeidx_t pov_type = cgc_nn.altnxt(CGC_BINTYPE_ALTVAL);
       if (pov_type == CGC_TYPE1_ALTVAL) {
+         char mbuf[256];
          ea_t t1val = cgc_nn.altval(CGC_TYPE1_ALTVAL);  
-         msg("adding type 1 breakpoint at 0x%x\n", t1val);
+         ::qsnprintf(mbuf, sizeof(mbuf), "adding type 1 breakpoint at 0x%llx\n", (uint64_t)t1val);
+         msg("%s", mbuf);
          addBreakpoint((uint32_t)t1val);
          setBreakOnSyscall(false);
          run();
@@ -1807,7 +1801,9 @@ FILE *LoadHeadersCommon(unsigned int addr, segment_t &s, bool createSeg = true) 
          s.color = DEFCOLOR;
          if (add_segm_ex(&s, ".headers", "DATA", ADDSEG_QUIET | ADDSEG_NOSREG)) {
             //zero out the newly created segment
-            msg("Zeroing headers segment 0x%x..0x%x\n", s.startEA, s.endEA);
+            char mbuf[256];
+            ::qsnprintf(mbuf, sizeof(mbuf), "Zeroing headers segment 0x%llx..0x%llx\n", (uint64_t)s.startEA, (uint64_t)s.endEA);
+            msg("%s", mbuf);
             for (ea_t ea = s.startEA; ea < s.endEA; ea++) {
                patch_byte(ea, 0);
             }

@@ -7,7 +7,7 @@ OBJECTS_DIR = p32-7
 
 #Need to change the following to your Ida install location
 linux-g++:IDA_APP = /opt/ida-$$(IDA_VERSION)
-macx:IDA_APP = "/Applications/IDA\ Pro\ $$(IDA_VERSION)/idaq.app/Contents"
+macx:IDA_APP = "/Applications/IDA\ Pro\ $$(IDA_VERSION)/ida.app/Contents"
 
 #Need to change the following to your Qt install location
 macx: {

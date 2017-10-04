@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+   echo "missing qt mkspec argument (macx-g++, macx-clang-32, or macx-clang (7.0))"
+   exit
+fi
+
+qmake -o Makefile.mac64 x86emu64-7.pro -platform $1
+make -f Makefile.mac64 clean
+make -f Makefile.mac64
+cp ../../bin/plugins/libx86emu_qt64.1.0.0.dylib ../../bin/plugins/x86emu_qt64.dylib

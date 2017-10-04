@@ -2,6 +2,8 @@
 #ifndef __IMAGE_H
 #define __IMAGE_H
 
+#include <stdint.h>
+
 //
 // Image Format
 //
@@ -12,19 +14,18 @@
 #define _STDCALL __attribute__ ((stdcall))
 #endif
 
-typedef unsigned short WORD, *PWORD, *LPWORD; 
-typedef short SHORT;
-typedef unsigned long DWORD, *PDWORD, *LPDWORD; 
-typedef unsigned char BYTE, *PBYTE, *LPBYTE; 
+typedef uint16_t WORD, *PWORD, *LPWORD; 
+typedef int16_t SHORT;
+typedef uint32_t DWORD, *PDWORD, *LPDWORD; 
+typedef uint8_t BYTE, *PBYTE, *LPBYTE; 
 typedef BYTE BOOLEAN, *PBOOLEAN; 
-typedef long LONG, *PLONG, *LPLONG; 
-typedef unsigned long ULONG, *PULONG; 
+typedef int32_t LONG, *PLONG, *LPLONG; 
+typedef uint32_t ULONG, *PULONG; 
 typedef char CHAR, *PCHAR; 
-typedef long long LONGLONG;
-typedef unsigned long long ULONGLONG;
+typedef int64_t LONGLONG;
+typedef uint64_t ULONGLONG;
 typedef void VOID, *PVOID, *LPVOID; 
-typedef wchar_t WCHAR, *PWCHAR; 
-
+typedef int16_t WCHAR, *PWCHAR; 
 
 #define IMAGE_DOS_SIGNATURE                 0x5A4D      // MZ
 #define IMAGE_OS2_SIGNATURE                 0x454E      // NE
@@ -527,7 +528,7 @@ typedef IMAGE_SYMBOL *PIMAGE_SYMBOL;
 #define IMAGE_SYM_TYPE_NULL                 0x0000  // no type.
 #define IMAGE_SYM_TYPE_VOID                 0x0001  //
 #define IMAGE_SYM_TYPE_CHAR                 0x0002  // type character.
-#define IMAGE_SYM_TYPE_SHORT                0x0003  // type short integer.
+#define IMAGE_SYM_TYPE_SHORT                0x0003  // type int16_t integer.
 #define IMAGE_SYM_TYPE_INT                  0x0004  //
 #define IMAGE_SYM_TYPE_LONG                 0x0005  //
 #define IMAGE_SYM_TYPE_FLOAT                0x0006  //

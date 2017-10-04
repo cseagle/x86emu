@@ -103,8 +103,6 @@ void removeVectoredExceptionHandler(unsigned int handler);
 
 #define FAKE_HANDLE_BASE 0x80000000
 
-extern HWND x86Dlg;
-
 struct FakedImport {
    unsigned int handle;  //module handle the lookup was performed on
    unsigned int addr;    //returned fake import address
@@ -842,6 +840,8 @@ static int getLastDir(char *dir, int len) {
 }
 
 #ifndef __NT__
+
+#define GetSystemWow64Directory GetSystemDirectory
 
 int GetSystemDirectory(char *dir, int size) {
    static char dllDir[512];
