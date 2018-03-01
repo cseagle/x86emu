@@ -116,9 +116,9 @@ DIST          =  aes.h \
 		aes.cpp \
 		ansi_cprng.cpp
 QMAKE_TARGET  = x86emu_qt64
-DESTDIR        = ..\..\bin\plugins\ #avoid trailing-slash linebreak
+DESTDIR        = bin\ #avoid trailing-slash linebreak
 TARGET         = x86emu_qt64.dll
-DESTDIR_TARGET = ..\..\bin\plugins\x86emu_qt64.dll
+DESTDIR_TARGET = bin\x86emu_qt64.dll
 
 ####### Implicit rules
 
@@ -184,7 +184,7 @@ dist:
 
 clean: compiler_clean 
 	-$(DEL_FILE) p64-7\x86emu.obj p64-7\x86emu_ui_qt.obj p64-7\emufuncs.obj p64-7\cpu.obj p64-7\emuheap.obj p64-7\memmgr.obj p64-7\seh.obj p64-7\break.obj p64-7\hooklist.obj p64-7\buffer.obj p64-7\emuthreads.obj p64-7\peutils.obj p64-7\emu_script.obj p64-7\context.obj p64-7\aes.obj p64-7\ansi_cprng.obj p64-7\moc_x86emu_ui_qt.obj
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt64.exp
+	-$(DEL_FILE) bin\x86emu_qt64.exp
 
 distclean: clean 
 	-$(DEL_FILE) $(DESTDIR_TARGET)
@@ -869,7 +869,7 @@ release\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		sdk_versions.h \
 		x86emu_ui.h \
 		x86emu_ui_qt.h
-	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files (x86)/IdaPro/idasdk70/plugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk70/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o release\moc_x86emu_ui_qt.cpp
+	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files (x86)/IdaPro/idasdk70/myplugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk70/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o release\moc_x86emu_ui_qt.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

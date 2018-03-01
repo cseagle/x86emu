@@ -127,7 +127,7 @@ make_default: release-make_default debug-make_default FORCE
 make_first: release-make_first debug-make_first FORCE
 all: release-all debug-all FORCE
 clean: release-clean debug-clean FORCE
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt.exp
+	-$(DEL_FILE) .\bin\x86emu_qt.exp
 distclean: release-distclean debug-distclean FORCE
 	-$(DEL_FILE) Makefile64.msvc
 

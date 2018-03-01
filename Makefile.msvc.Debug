@@ -12,8 +12,8 @@ MAKEFILE      = Makefile.msvc.Debug
 CC            = cl
 CXX           = cl
 DEFINES       = -DWIN32 -D__IDP__ -D__QT__ -D__NT__ -DWIN32 -D_CRT_SECURE_NO_WARNINGS -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NAMESPACE=QT
-CFLAGS        = -nologo -Zm200 -Zc:wchar_t -Zi -MDd -W3 /Fd..\..\bin\plugins\x86emu_qt.pdb $(DEFINES)
-CXXFLAGS      = -nologo -Zm200 -Zc:wchar_t -Zi -MDd -GR -W3 -w34100 -w34189 -EHsc /Fd..\..\bin\plugins\x86emu_qt.pdb $(DEFINES)
+CFLAGS        = -nologo -Zm200 -Zc:wchar_t -Zi -MDd -W3 /Fd.\bin\x86emu_qt.pdb $(DEFINES)
+CXXFLAGS      = -nologo -Zm200 -Zc:wchar_t -Zi -MDd -GR -W3 -w34100 -w34189 -EHsc /Fd.\bin\x86emu_qt.pdb $(DEFINES)
 INCPATH       = -I"." -I"..\..\include" -I"C:\Qt\5.4.1\qtbase\include" -I"C:\Qt\5.4.1\qtbase\include\QtWidgets" -I"C:\Qt\5.4.1\qtbase\include\QtGui" -I"C:\Qt\5.4.1\qtbase\include\QtCore" -I"debug" -I"C:\Qt\5.4.1\qtbase\mkspecs\win32-msvc2010" 
 LINKER        = link
 LFLAGS        = /NOLOGO /DYNAMICBASE /NXCOMPAT /DEBUG /DLL /SUBSYSTEM:WINDOWS
@@ -116,9 +116,9 @@ DIST          =  aes.h \
 		aes.cpp \
 		ansi_cprng.cpp
 QMAKE_TARGET  = x86emu_qt
-DESTDIR        = ..\..\bin\plugins\ #avoid trailing-slash linebreak
+DESTDIR        = .\bin\ #avoid trailing-slash linebreak
 TARGET         = x86emu_qt.plw
-DESTDIR_TARGET = ..\..\bin\plugins\x86emu_qt.plw
+DESTDIR_TARGET = .\bin\x86emu_qt.plw
 
 ####### Implicit rules
 
@@ -170,21 +170,21 @@ first: all
 all: Makefile.msvc.Debug $(DESTDIR_TARGET)
 
 $(DESTDIR_TARGET):  $(OBJECTS) 
-	echo 2 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "..\\..\\bin\\plugins\\x86emu_qt.plw.embed.manifest">..\..\bin\plugins\x86emu_qt.plw_manifest.rc
-	if not exist $(DESTDIR_TARGET) if exist ..\..\bin\plugins\x86emu_qt.plw.embed.manifest del ..\..\bin\plugins\x86emu_qt.plw.embed.manifest
-	if exist ..\..\bin\plugins\x86emu_qt.plw.embed.manifest copy /Y ..\..\bin\plugins\x86emu_qt.plw.embed.manifest ..\..\bin\plugins\x86emu_qt.plw_manifest.bak
-	$(LINKER) $(LFLAGS) /MANIFEST /MANIFESTFILE:..\..\bin\plugins\x86emu_qt.plw.embed.manifest /OUT:$(DESTDIR_TARGET) @<<
+	echo 2 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ ".\\bin\\x86emu_qt.plw.embed.manifest">.\bin\x86emu_qt.plw_manifest.rc
+	if not exist $(DESTDIR_TARGET) if exist .\bin\x86emu_qt.plw.embed.manifest del .\bin\x86emu_qt.plw.embed.manifest
+	if exist .\bin\x86emu_qt.plw.embed.manifest copy /Y .\bin\x86emu_qt.plw.embed.manifest .\bin\x86emu_qt.plw_manifest.bak
+	$(LINKER) $(LFLAGS) /MANIFEST /MANIFESTFILE:.\bin\x86emu_qt.plw.embed.manifest /OUT:$(DESTDIR_TARGET) @<<
 $(OBJECTS) $(LIBS) 
-!IF EXIST(..\..\bin\plugins\x86emu_qt.plw_manifest.res)
-..\..\bin\plugins\x86emu_qt.plw_manifest.res
+!IF EXIST(.\bin\x86emu_qt.plw_manifest.res)
+.\bin\x86emu_qt.plw_manifest.res
 !ENDIF
 <<
-	if exist ..\..\bin\plugins\x86emu_qt.plw_manifest.bak fc /b ..\..\bin\plugins\x86emu_qt.plw.embed.manifest ..\..\bin\plugins\x86emu_qt.plw_manifest.bak >NUL || del ..\..\bin\plugins\x86emu_qt.plw_manifest.bak
-	if not exist ..\..\bin\plugins\x86emu_qt.plw_manifest.bak rc.exe /fo..\..\bin\plugins\x86emu_qt.plw_manifest.res ..\..\bin\plugins\x86emu_qt.plw_manifest.rc
-	if not exist ..\..\bin\plugins\x86emu_qt.plw_manifest.bak $(LINKER) $(LFLAGS) /MANIFEST /MANIFESTFILE:..\..\bin\plugins\x86emu_qt.plw.embed.manifest /OUT:$(DESTDIR_TARGET) @<<
-$(OBJECTS) $(LIBS) ..\..\bin\plugins\x86emu_qt.plw_manifest.res
+	if exist .\bin\x86emu_qt.plw_manifest.bak fc /b .\bin\x86emu_qt.plw.embed.manifest .\bin\x86emu_qt.plw_manifest.bak >NUL || del .\bin\x86emu_qt.plw_manifest.bak
+	if not exist .\bin\x86emu_qt.plw_manifest.bak rc.exe /fo.\bin\x86emu_qt.plw_manifest.res .\bin\x86emu_qt.plw_manifest.rc
+	if not exist .\bin\x86emu_qt.plw_manifest.bak $(LINKER) $(LFLAGS) /MANIFEST /MANIFESTFILE:.\bin\x86emu_qt.plw.embed.manifest /OUT:$(DESTDIR_TARGET) @<<
+$(OBJECTS) $(LIBS) .\bin\x86emu_qt.plw_manifest.res
 <<
-	if exist ..\..\bin\plugins\x86emu_qt.plw_manifest.bak del ..\..\bin\plugins\x86emu_qt.plw_manifest.bak
+	if exist .\bin\x86emu_qt.plw_manifest.bak del .\bin\x86emu_qt.plw_manifest.bak
 
 qmake: FORCE
 	@$(QMAKE) -platform win32-msvc2010 -o Makefile.msvc.Debug x86emu.pro
@@ -196,10 +196,10 @@ dist:
 
 clean: compiler_clean 
 	-$(DEL_FILE) p32\x86emu.obj p32\x86emu_ui_qt.obj p32\emufuncs.obj p32\cpu.obj p32\emuheap.obj p32\memmgr.obj p32\seh.obj p32\break.obj p32\hooklist.obj p32\buffer.obj p32\emuthreads.obj p32\peutils.obj p32\emu_script.obj p32\context.obj p32\aes.obj p32\ansi_cprng.obj p32\moc_x86emu_ui_qt.obj
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt.exp ..\..\bin\plugins\x86emu_qt.ilk ..\..\bin\plugins\x86emu_qt.idb ..\..\bin\plugins\x86emu_qt.plw.embed.manifest ..\..\bin\plugins\x86emu_qt.plw_manifest.rc ..\..\bin\plugins\x86emu_qt.plw_manifest.res
+	-$(DEL_FILE) .\bin\x86emu_qt.exp .\bin\x86emu_qt.ilk .\bin\x86emu_qt.idb .\bin\x86emu_qt.plw.embed.manifest .\bin\x86emu_qt.plw_manifest.rc .\bin\x86emu_qt.plw_manifest.res
 
 distclean: clean 
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt.pdb
+	-$(DEL_FILE) .\bin\x86emu_qt.pdb
 	-$(DEL_FILE) $(DESTDIR_TARGET)
 	-$(DEL_FILE) Makefile.msvc.Debug
 
@@ -882,7 +882,7 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		sdk_versions.h \
 		x86emu_ui.h \
 		x86emu_ui_qt.h
-	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1600 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2010 -I"C:/Program Files (x86)/IdaPro/idasdk70/plugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk70/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
+	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1600 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2010 -I"C:/Program Files (x86)/IdaPro/idasdk70/myplugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk70/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

@@ -75,9 +75,9 @@ OBJECTS       = p64\x86emu.obj \
 		p64\moc_x86emu_ui_qt.obj
 DIST          = 
 QMAKE_TARGET  = x86emu_qt
-DESTDIR        = ..\..\bin\plugins\ #avoid trailing-slash linebreak
+DESTDIR        = .\bin\ #avoid trailing-slash linebreak
 TARGET         = x86emu_qt.p64
-DESTDIR_TARGET = ..\..\bin\plugins\x86emu_qt.p64
+DESTDIR_TARGET = .\bin\x86emu_qt.p64
 
 ####### Implicit rules
 
@@ -142,7 +142,7 @@ dist:
 
 clean: compiler_clean 
 	-$(DEL_FILE) p64\x86emu.obj p64\x86emu_ui_qt.obj p64\emufuncs.obj p64\cpu.obj p64\emuheap.obj p64\memmgr.obj p64\seh.obj p64\break.obj p64\hooklist.obj p64\buffer.obj p64\emuthreads.obj p64\peutils.obj p64\emu_script.obj p64\context.obj p64\aes.obj p64\ansi_cprng.obj p64\moc_x86emu_ui_qt.obj
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt.exp
+	-$(DEL_FILE) .\bin\x86emu_qt.exp
 
 distclean: clean
 	-$(DEL_FILE) $(DESTDIR_TARGET)

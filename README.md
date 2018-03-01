@@ -66,7 +66,7 @@ assuming a properly configure command line build environment:
 
 > nmake -f Makefile.msvc
 
-You should find the compiled plugin at <SDK>/bin/plugins/x86emu_qt.plw
+You should find the compiled plugin at bin/x86emu_qt.plw
 
 Build scripts for Windows, linux, and OS X ship with x86emu.  Within the
 plugin directory, the command
@@ -84,7 +84,7 @@ of the plugin for IDA versions 5.7 and older.
 The VC++ solution file for Visual Studio 2010 and above and is named: x86emu.sln
 
 Open the solution file with Visual Studio and you should be able to build 
-x86emu.plw which will end up in <SDK>bin\plugins\x86emu.plw
+x86emu.plw which will end up in bin\x86emu.plw
 
 ---------------------------------------------------------------------------
 

@@ -8,4 +8,4 @@ fi
 qmake -o Makefile.mac32 x86emu.pro -platform $1
 make -f Makefile.mac32 clean
 make -f Makefile.mac32
-cp ../../bin/plugins/libx86emu_qt.1.0.0.dylib ../../bin/plugins/x86emu_qt.pmc
+cp ./bin/libx86emu_qt.1.0.0.dylib ./bin/x86emu_qt.pmc

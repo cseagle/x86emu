@@ -39,7 +39,7 @@ CONFIG += qt dll
 
 INCLUDEPATH += $${SDK}/include
 
-DESTDIR = $${SDK}/bin/plugins
+DESTDIR = bin
 
 DEFINES += __IDP__ __QT__ __EA64__
 win32:DEFINES += __NT__ WIN32

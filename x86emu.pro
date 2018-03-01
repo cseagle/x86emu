@@ -40,7 +40,7 @@ CONFIG += qt dll
 
 INCLUDEPATH += $${SDK}/include
 
-DESTDIR = $${SDK}/bin/plugins
+DESTDIR = bin
 
 #DEFINES += DEBUG
 DEFINES += __IDP__ __QT__

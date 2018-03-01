@@ -184,7 +184,7 @@ qmake_all: FORCE
 make_first: release-make_first debug-make_first FORCE
 all: release-all debug-all FORCE
 clean: release-clean debug-clean FORCE
-	-$(DEL_FILE) ..\..\bin\plugins\x86emu_qt64.exp
+	-$(DEL_FILE) bin\x86emu_qt64.exp
 distclean: release-distclean debug-distclean FORCE
 	-$(DEL_FILE) Makefile64-7.msvc
 

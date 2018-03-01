@@ -3,4 +3,4 @@
 qmake -o Makefile.g++32 x86emu.pro -platform linux-g++
 gmake -f Makefile.g++32 clean
 gmake -f Makefile.g++32
-cp ../../bin/plugins/libx86emu_qt.so.1.0.0 ../../bin/plugins/x86emu_qt.plx
+cp ./bin/libx86emu_qt.so.1.0.0 ./bin/x86emu_qt.plx
