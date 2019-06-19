@@ -227,6 +227,8 @@ extern til_t *ti;
 
 bool isWindowCreated = false;
 
+filetype_t current_filetype;
+
 #if IDA_SDK_VERSION >= 700
 static ssize_t idaapi idpCallback(void * cookie, int code, va_list va);
 #else
@@ -569,15 +571,15 @@ void pushData() {
 
 //ask user for an address range and dump that address range
 //to a user named file;
-void dumpRange(unsigned int low, unsigned int hi) {
+void dumpRange(ea_t low, ea_t hi) {
    char buf[80];
-   ::qsnprintf(buf, sizeof(buf), "0x%08X-0x%08X", low, hi);
+   ::qsnprintf(buf, sizeof(buf), EA_FMT "-" EA_FMT, low, hi);
    char *range = inputBox("Enter Range", "Enter the address range to dump (inclusive)", buf);
    if (range) {
       char *end;
-      unsigned int start = strtoul(range, &end, 0);
+      ea_t start = (ea_t)strtoull(range, &end, 0);
       if (end) {
-         unsigned int finish = strtoul(++end, NULL, 0);
+         ea_t finish = (ea_t)strtoull(++end, NULL, 0);
          char szFile[260];       // buffer for file name
 #ifndef __QT__
          const char *filter = "All (*.*)\0*.*\0Binary (*.bin)\0*.BIN\0Executable (*.exe)\0*.EXE\0Dynamic link library (*.dll)\0*.DLL\0";
@@ -605,7 +607,11 @@ void dumpRange(unsigned int low, unsigned int hi) {
 //ask user for an address range and dump that address range
 //to a user named file;
 void dumpRange() {
-   dumpRange((unsigned int)get_screen_ea(), (unsigned int)inf.maxEA);
+#if IDA_SDK_VERSION < 730
+   dumpRange(get_screen_ea(), inf.min_ea);
+#else
+   dumpRange(get_screen_ea(), inf_get_min_ea());
+#endif
 }
 
 //ask user for an address range and dump that address range
@@ -739,7 +745,7 @@ void generateArgList(const char *func, argcallback_t cb, void *user) {
    }
 }
 
-#else 
+#else
 
 void generateArgList(const char *func, argcallback_t cb, void *user) {
    char buf[256];
@@ -903,7 +909,7 @@ bool loadLibrary() {
             return false;
          }
          unsigned int loadBase = nt.OptionalHeader.ImageBase;
-         
+
          //now loop to find hole large enough to accomodate image
          //try ImageBase first
          bool found = false;
@@ -1038,7 +1044,7 @@ bool loadLibrary() {
          addModuleToPeb(loadBase, mod);
          addNewModuleNode(mod, loadBase, 0);
          qfree(mod);
-         
+
          //now process imports
          unsigned int importDir = nt.OptionalHeader.DataDirectory[1].VirtualAddress;
          if (importDir) {
@@ -1080,7 +1086,7 @@ bool loadLibrary() {
                importDir += 0x14;  //sizeof(IMAGE_IMPORT_DESCRIPTOR)
             }
          }
-         
+
          //make code at dll entry point(s)
          char *ep = (char*)qalloc(strlen(base) + 20);
          ::qsnprintf(ep, strlen(base) + 20, "%s_DllEntryPoint", base);
@@ -1113,7 +1119,7 @@ bool loadLibrary() {
 
          qfree(sect);
          qfclose(f);
-         msg("x86emu: Loaded %s at address 0x%X, entry point is 0x%x\n", 
+         msg("x86emu: Loaded %s at address 0x%X, entry point is 0x%x\n",
               fileName, loadBase, loadBase + nt.OptionalHeader.AddressOfEntryPoint);
          return true;
       }
@@ -1322,7 +1328,7 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
             Buffer *b = new Buffer();
             x86emu_node.create(x86emu_node_name);
             if (saveState(x86emu_node) == X86EMUSAVE_OK) {
-               if (inf.filetype == f_CGC) {
+               if (current_filetype == f_CGC) {
                   save_cgc_rand_state();
                }
                msg("x86emu: Emulator state was saved.\n");
@@ -1336,7 +1342,7 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
             saveFunctionInfo(*b);
             funcinfo_node.setblob(b->get_buf(), b->get_wlen(), 0, 'B');
             delete b;
-      
+
             if (pe.valid) {
                b = new Buffer();
                petable_node.create(petable_node_name);
@@ -1344,13 +1350,13 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
                petable_node.setblob(b->get_buf(), b->get_wlen(), 0, 'B');
                delete b;
             }
-      
+
             b = new Buffer();
             module_node.create(module_node_name);
             saveModuleData(*b);
             module_node.setblob(b->get_buf(), b->get_wlen(), 0, 'B');
             delete b;
-         }   
+         }
          break;
       }
 #if IDA_SDK_VERSION >= 520
@@ -1411,7 +1417,7 @@ bool get_cgc_config() {
             goto askuser;
          }
       }
-      port = cgc_nn.altval(CGC_PORT_ALTVAL);      
+      port = cgc_nn.altval(CGC_PORT_ALTVAL);
       cgc_nn.supstr(CGC_HOST_SUPVAL, host, sizeof(host));
       cgc_nn.supstr(CGC_SEED_SUPVAL, seed, sizeof(seed));
       cgc_nn.supstr(CGC_NSEED_SUPVAL, nseed, sizeof(seed));
@@ -1423,7 +1429,7 @@ askuser:
 //      msg("seed: %s\nnseed: %s\nhost: %s\nport: %u\ntype: %d\n", seed, nseed, host, (uint32_t)port, bin_type);
       return cgc_global_init(seed, nseed, host, (uint16_t)port, bin_type);
    }
-   return false;   
+   return false;
 }
 
 void check_auto_cgc() {
@@ -1439,7 +1445,7 @@ void check_auto_cgc() {
       nodeidx_t pov_type = cgc_nn.altnxt(CGC_BINTYPE_ALTVAL);
       if (pov_type == CGC_TYPE1_ALTVAL) {
          char mbuf[256];
-         ea_t t1val = cgc_nn.altval(CGC_TYPE1_ALTVAL);  
+         ea_t t1val = cgc_nn.altval(CGC_TYPE1_ALTVAL);
          ::qsnprintf(mbuf, sizeof(mbuf), "adding type 1 breakpoint at 0x%llx\n", (uint64_t)t1val);
          msg("%s", mbuf);
          addBreakpoint((uint32_t)t1val);
@@ -1476,24 +1482,24 @@ void setPEimageBase() {
 }
 
 static void loadBaseCommon() {
-   if (inf.filetype == f_PE) {
+   if (current_filetype == f_PE) {
       setPEimageBase();
       //there has got to be a better way to choose til
       //or detect what is already loaded
       init_til("mssdk.til");
    }
-   else if (inf.filetype == f_ELF) {
+   else if (current_filetype == f_ELF) {
       //there has got to be a better way to choose til
       //or detect what is already loaded
       init_til("gnuunx.til");
       init_til("gnulnx_x86.til");
    }
-   else if (inf.filetype == f_CGC) {
+   else if (current_filetype == f_CGC) {
       //there has got to be a better way to choose til
       //or detect what is already loaded
       init_til("cgc.til");
    }
-   else if (inf.filetype == f_PDF) {
+   else if (current_filetype == f_PDF) {
       peImageBase = 0x400000;
       init_til("mssdk.til");
    }
@@ -1518,7 +1524,11 @@ static ssize_t idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
 static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
 #endif
    switch (code) {
+#if IDA_SDK_VERSION >= 700
    case processor_t::ev_newfile: {
+#else
+   case processor_t::newfile: {
+#endif
       //
       // a new database has been opened
       //
@@ -1539,7 +1549,11 @@ static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
       clearFunctionInfoList();
       break;
    }
+#if IDA_SDK_VERSION >= 700
    case processor_t::ev_oldfile: {
+#else
+   case processor_t::oldfile: {
+#endif
       if (netnode_exist(module_node)) {
          // There's a module_node in the database.  Attempt to
          // instantiate the module info list from it.
@@ -1566,7 +1580,7 @@ static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
 
          if (loadStatus == X86EMULOAD_OK) {
             cpuInit = true;
-            if (inf.filetype == f_CGC) {
+            if (current_filetype == f_CGC) {
                restore_cgc_rand_state();
             }
          }
@@ -1954,7 +1968,11 @@ unsigned int PELoadHeaders() {
 unsigned int ELFLoadHeaders(uint32_t magic) {
    segment_t s;
    uint32_t addr = (uint32_t)x86emu_node.altval(X86_ORIG_MINEA);
-   uint32_t min_addr = (uint32_t)inf.minEA;
+#if IDA_SDK_VERSION < 730
+   uint32_t min_addr = (uint32_t)inf.min_ea;
+#else
+   uint32_t min_addr = (uint32_t)inf_get_min_ea();
+#endif
    uint32_t base_addr = (uint32_t)min_addr;
    bool make_it = true;
    if (get_long(min_addr) == magic) {
@@ -2302,7 +2320,7 @@ unsigned int createWindowsPEB() {
    patch_long(pebBase + SIZEOF_PEB + 4, heap);
 
    // NEED TO MOVE LdrData out of the PEB
-   
+
    // space from end of PEB to end of page is dedicated to
    // heap admin
    initPebLdrData(pebBase);
@@ -2553,13 +2571,13 @@ void buildElfMainArgs() {
 }
 
 void buildMainArgs() {
-   if (inf.filetype == f_PE) {
+   if (current_filetype == f_PE) {
       buildPEMainArgs();
    }
-   else if (inf.filetype == f_ELF) {
+   else if (current_filetype == f_ELF) {
       buildElfMainArgs();
    }
-   else if (inf.filetype == f_CGC) {
+   else if (current_filetype == f_CGC) {
       //get esp set properly for CGC
       push(0, SIZE_DWORD);
       syncDisplay();
@@ -2821,8 +2839,13 @@ bool haveHeapSegment() {
 int idaapi init(void) {
    cpuInit = false;
 
-//   if (strcmp(inf.procName, "metapc")) return PLUGIN_SKIP;
    if (ph.id != PLFM_386) return PLUGIN_SKIP;
+
+#if IDA_SDK_VERSION < 730
+   current_filetype = inf.filetype;
+#else
+   current_filetype = inf_get_filetype();
+#endif
 
 //   msg(PLUGIN_NAME": hooking idp\n");
    hook_to_notification_point(HT_IDP, idpCallback, NULL);
@@ -2853,7 +2876,7 @@ void idaapi term(void) {
       close(hProv);
 #endif
    }
-   if (inf.filetype == f_CGC) {
+   if (current_filetype == f_CGC) {
       cgc_cleanup();
    }
    if (uiHooked) {
@@ -2942,7 +2965,15 @@ void idaapi run(int /*arg*/) {
          GetSystemTimeAsFileTime(&baseTime);
          x86emu_node.create(x86emu_node_name);
 
-         x86emu_node.altset(X86_ORIG_MINEA, inf.minEA);
+#if IDA_SDK_VERSION < 730
+         x86emu_node.altset(X86_ORIG_MINEA, inf.min_ea);
+         x86emu_node.altset(X86_MINEA, inf.min_ea);
+         x86emu_node.altset(X86_MAXEA, inf.max_ea);
+#else
+         x86emu_node.altset(X86_ORIG_MINEA, inf_get_min_ea());
+         x86emu_node.altset(X86_MINEA, inf_get_min_ea());
+         x86emu_node.altset(X86_MAXEA, inf_get_max_ea());
+#endif
 
          segment_t *s = get_first_seg();
          if (s && (s->startEA & 0xFFF)) {
@@ -2954,8 +2985,6 @@ void idaapi run(int /*arg*/) {
             }
          }
 
-         x86emu_node.altset(X86_MINEA, inf.minEA);
-
          s = get_last_seg();
          if (s && (s->endEA & 0xFFF)) {
             unsigned int currend = (unsigned int)s->endEA;
@@ -2966,7 +2995,6 @@ void idaapi run(int /*arg*/) {
             }
          }
 
-         x86emu_node.altset(X86_MAXEA, inf.maxEA);
          getRandomBytes(&randVal, 4);
          x86emu_node.altset(X86_RANDVAL, randVal);
 
@@ -2979,7 +3007,7 @@ void idaapi run(int /*arg*/) {
 
          kernel_node.create(kernel_node_name);
 
-         if (inf.filetype == f_PE || inf.filetype == f_PDF) {
+         if (current_filetype == f_PE || current_filetype == f_PDF) {
             //need to allow this to be user selectable at some point
             os_personality = PERS_WINDOWS_XP;
 
@@ -2998,7 +3026,7 @@ void idaapi run(int /*arg*/) {
             kernel_node.altset(OS_GDT_LIMIT, WIN_GDT_LIMIT);
 
          }
-         else if (inf.filetype == f_ELF) {
+         else if (current_filetype == f_ELF) {
             //need to allow this to be user selectable at some point
             //need a better assumption than ELF == Linux
             os_personality = PERS_LINUX_26;
@@ -3017,9 +3045,13 @@ void idaapi run(int /*arg*/) {
             kernel_node.altset(OS_GDT_BASE, LINUX_GDT_BASE);
             kernel_node.altset(OS_GDT_LIMIT, LINUX_GDT_LIMIT);
 
-            kernel_node.altset(OS_LINUX_BRK, inf.maxEA);
+#if IDA_SDK_VERSION < 730
+            kernel_node.altset(OS_LINUX_BRK, inf.max_ea);
+#else
+            kernel_node.altset(OS_LINUX_BRK, inf_get_max_ea());
+#endif
          }
-         else if (inf.filetype == f_CGC) {
+         else if (current_filetype == f_CGC) {
             //need to allow this to be user selectable at some point
             //need a better assumption than ELF == Linux
             os_personality = PERS_CGC_DECREE;
@@ -3046,7 +3078,7 @@ void idaapi run(int /*arg*/) {
       //choose CPUID features regardless of file type
       unsigned int init_eip = (unsigned int)get_screen_ea();
       unsigned int elf_base = 0;
-      if (inf.filetype == f_PE && !netnode_exist(petable_node)) {
+      if (current_filetype == f_PE && !netnode_exist(petable_node)) {
          //init some PE specific stuff
          unsigned int headerBase = PELoadHeaders();
          msg("headerBase is %x, valid = %d\n", headerBase, pe.valid);
@@ -3073,15 +3105,15 @@ void idaapi run(int /*arg*/) {
 //            msg("headerBase == 0xFFFFFFFF\n");
          }
       }
-      else if (inf.filetype == f_ELF) {
+      else if (current_filetype == f_ELF) {
          //init some ELF specific stuff
          elf_base = ELFLoadHeaders(ELF_MAGIC);
       }
-      else if (inf.filetype == f_CGC) {
+      else if (current_filetype == f_CGC) {
          //init some CGC specific stuff
          elf_base = ELFLoadHeaders(CGC_MAGIC);
       }
-      else if (inf.filetype == f_PDF) {
+      else if (current_filetype == f_PDF) {
          peImageBase = 0x400000;
          createWindowsProcess();
       }
@@ -3090,7 +3122,7 @@ void idaapi run(int /*arg*/) {
          unsigned int idtLimit = 0x800;
          unsigned int gdtBase = 0;
          unsigned int gdtLimit = 0x400;
-         if (inf.filetype == f_PE || inf.filetype == f_PDF) {
+         if (current_filetype == f_PE || current_filetype == f_PDF) {
             enableSEH();
             //typical values for Windows XP segment registers
             _es = _ss = _ds = 0x23;   //0x167 for win98
@@ -3108,7 +3140,7 @@ void idaapi run(int /*arg*/) {
             gdtLimit = WIN_GDT_LIMIT;
 
          }
-         else if (inf.filetype == f_CGC) {
+         else if (current_filetype == f_CGC) {
             unsigned char seed[48];
             if (!get_cgc_config()) {
                //getting cgc config failed so make a token
@@ -3118,7 +3150,7 @@ void idaapi run(int /*arg*/) {
                init_cgc_random(seed, sizeof(seed));
             }
             cgc_random(CGC_MAGIC_PAGE, CGC_PAGE_SIZE);
-            
+
             createCGCStack();
             //create initial thread
             threadList = activeThread = new ThreadNode();

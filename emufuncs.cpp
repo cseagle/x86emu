@@ -5246,7 +5246,12 @@ void syscall() {
                segment_t *s = (segment_t *)segs.getn_area(segs.get_prev_area(ebx));
 #endif
                if (ebx && ebx != cbrk) {
-                  if (ebx > inf.omaxEA) {
+#if IDA_SDK_VERSION < 730
+                  uint32_t omax_ea = (uint32_t)inf.omax_ea;
+#else
+                  uint32_t omax_ea = (uint32_t)inf_get_omax_ea();
+#endif
+                  if (ebx > omax_ea) {
                      unsigned int newbrk = (ebx + 0xfff) & ~0xfff;
                      if (s) {
                         cbrk = (unsigned int)s->endEA;

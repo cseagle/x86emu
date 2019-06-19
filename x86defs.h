@@ -91,6 +91,12 @@ typedef int int32_t;
 
 #include "sdk_versions.h"
 
+#ifdef __EA64__
+#define EA_FMT "0x%016lx"
+#else
+#define EA_FMT "0x%08x"
+#endif
+
 //Some idasdk70 transition macros
 #if IDA_SDK_VERSION >= 700
 
@@ -159,6 +165,11 @@ typedef int int32_t;
 
 #define start_ea startEA
 #define end_ea endEA
+#define min_ea minEA
+#define max_ea maxEA
+#define omin_ea ominEA
+#define omax_ea omaxEA
+#define procname procName
 
 #define ev_add_cref add_cref
 #define ev_add_dref add_dref
@@ -625,7 +636,7 @@ unsigned int *getRegisterPointer(int reg);
 unsigned int getRegisterValue(int reg);
 void setRegisterValue(int reg, unsigned int val);
 void pushData();
-void dumpRange(unsigned int low, unsigned int hi);
+void dumpRange(ea_t low, ea_t hi);
 void dumpEmbededPE();
 void switchThread(int tidx);
 void destroyThread(int tidx);
