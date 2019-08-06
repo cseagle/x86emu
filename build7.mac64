@@ -5,6 +5,8 @@ if [ -z "$1" ]; then
    exit
 fi
 
+export IDAVER=`pwd | grep -o -E "idasdk[0-9]{2}" | cut -c 7-`0
+
 qmake -o Makefile.mac64 x86emu64-7.pro -platform $1
 make -f Makefile.mac64 clean
 make -f Makefile.mac64
