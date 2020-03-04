@@ -98,6 +98,10 @@
 #define SEGMOD_KEEP 0
 #endif
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 void addVectoredExceptionHandler(bool first, unsigned int handler);
 void removeVectoredExceptionHandler(unsigned int handler);
 
@@ -704,17 +708,17 @@ unsigned int findPebModuleByName(char *name) {
 void addModuleToPeb(unsigned int handle, const char *name, bool loading) {
    segment_t *s = get_segm_by_name(".peb");
    if (s) {
-      msg("adding %s (%x) to PEB\n", name, handle);
+//      msg("adding %s (%x) to PEB\n", name, handle);
       unsigned int peb = (unsigned int)s->startEA;
       unsigned int pebLdr = get_long(peb + 0xC);
 
       unsigned int uni = allocateUnicodeString(name);
-      msg("mod name allocated at %x\n", uni);
+//      msg("mod name allocated at %x\n", uni);
 
       //mod is the address of the LDR_MODULE that we are allocating
       unsigned int mod = HeapBase::getHeap()->malloc(LDR_MODULE_SIZE);
       unsigned int pe = handle + get_long(handle + 0x3C);
-      msg("mod allocated at %x\n", mod);
+//      msg("mod allocated at %x\n", mod);
       patch_long(mod + BASE_ADDRESS_OFFSET, handle);  //BaseAddress
       patch_long(mod + BASE_ADDRESS_OFFSET + 4, handle + get_long(pe + 0x28)); //EntryPoint
       patch_long(mod + BASE_ADDRESS_OFFSET + 8, get_long(pe + 0x50)); //SizeOfImage
@@ -728,9 +732,9 @@ void addModuleToPeb(unsigned int handle, const char *name, bool loading) {
 //      patch_long(mod + 68, 0);  //TimeDateStamp
 
       unsigned int loadOrder = pebLdr + 0xC;
-      msg("addModuleToPeb containsModule\n");
+//      msg("addModuleToPeb containsModule\n");
       if (containsModule(loadOrder, handle, 24)) return;
-      msg("addModuleToPeb containsModule complete\n");
+//      msg("addModuleToPeb containsModule complete\n");
 
       unsigned int memoryOrder = pebLdr + 0x14;
       unsigned int initOrder = pebLdr + 0x1C;
@@ -738,12 +742,12 @@ void addModuleToPeb(unsigned int handle, const char *name, bool loading) {
          insertHead(initOrder, mod, 8);
       }
       else {
-         msg("addModuleToPeb insertTail, initOrder\n");
+//         msg("addModuleToPeb insertTail, initOrder\n");
          insertTail(initOrder, mod, 8);
       }
-      msg("addModuleToPeb insertTail, loadOrder\n");
+//      msg("addModuleToPeb insertTail, loadOrder\n");
       insertTail(loadOrder, mod, 24);
-      msg("addModuleToPeb insertTail, memoryOrder\n");
+//      msg("addModuleToPeb insertTail, memoryOrder\n");
       insertInOrder(memoryOrder, mod, 16);
 
       msg("module added %s (%x) to PEB\n", name, handle);
@@ -753,20 +757,20 @@ void addModuleToPeb(unsigned int handle, const char *name, bool loading) {
 void addModuleToPeb(HandleNode *hn, bool loading, unsigned int uni) {
    segment_t *s = get_segm_by_name(".peb");
    if (s) {
-      msg("adding %s (%x) to PEB\n", hn->moduleName, hn->handle);
+//      msg("adding %s (%x) to PEB\n", hn->moduleName, hn->handle);
       unsigned int peb = (unsigned int)s->startEA;
       unsigned int pebLdr = get_long(peb + 0xC);
 
       if (uni == 0) {
          uni = allocateUnicodeString(hn->moduleName);
       }
-      msg("mod name allocated at %x\n", uni);
+//      msg("mod name allocated at %x\n", uni);
 
       //mod is the address of the LDR_MODULE that we are allocating
       unsigned int mod = HeapBase::getHeap()->malloc(LDR_MODULE_SIZE);
 
       unsigned int pe = hn->handle + get_long(hn->handle + 0x3C);
-      msg("mod allocated at %x\n", mod);
+//      msg("mod allocated at %x\n", mod);
       patch_long(mod + BASE_ADDRESS_OFFSET, hn->handle);  //BaseAddress
       patch_long(mod + BASE_ADDRESS_OFFSET + 4, hn->handle + get_long(pe + 0x28)); //EntryPoint
       patch_long(mod + BASE_ADDRESS_OFFSET + 8, get_long(pe + 0x50)); //SizeOfImage
@@ -780,9 +784,9 @@ void addModuleToPeb(HandleNode *hn, bool loading, unsigned int uni) {
 //      patch_long(mod + 68, 0);  //TimeDateStamp
 
       unsigned int loadOrder = pebLdr + 0xC;
-      msg("addModuleToPeb containsModule\n");
+//      msg("addModuleToPeb containsModule\n");
       if (containsModule(loadOrder, hn->handle, 24)) return;
-      msg("addModuleToPeb containsModule complete\n");
+//      msg("addModuleToPeb containsModule complete\n");
 
       unsigned int memoryOrder = pebLdr + 0x14;
       unsigned int initOrder = pebLdr + 0x1C;
@@ -790,12 +794,12 @@ void addModuleToPeb(HandleNode *hn, bool loading, unsigned int uni) {
          insertHead(initOrder, mod, 8);
       }
       else {
-         msg("addModuleToPeb insertTail, initOrder\n");
+//         msg("addModuleToPeb insertTail, initOrder\n");
          insertTail(initOrder, mod, 8);
       }
-      msg("addModuleToPeb insertTail, loadOrder\n");
+//      msg("addModuleToPeb insertTail, loadOrder\n");
       insertTail(loadOrder, mod, 24);
-      msg("addModuleToPeb insertTail, memoryOrder\n");
+//      msg("addModuleToPeb insertTail, memoryOrder\n");
       insertInOrder(memoryOrder, mod, 16);
 
       msg("module added %s (%x) to PEB\n", hn->moduleName, hn->handle);
@@ -971,7 +975,10 @@ HandleNode *addModule(const char *mod, bool loading, int id, bool addToPeb) {
          }
          if (f) {
             h = loadIntoIdb(f);
-            if (h == 0xFFFFFFFF) h = 0;
+            if (h == 0xFFFFFFFF) {
+//               msg("loadIntoIdb failed\n");
+               h = 0;
+            }
             fclose(f);
          }
          if (h == 0) {
@@ -985,7 +992,7 @@ HandleNode *addModule(const char *mod, bool loading, int id, bool addToPeb) {
          addModuleToPeb(h, mod, loading);
       }
    }
-   msg("addModule returning for %s\n", mod);
+//   msg("addModule returning for %s\n", mod);
    return m;
 }
 
@@ -4118,6 +4125,7 @@ void emu_free(unsigned int /*addr*/) {
 }
 
 void doImports(PETables &pe) {
+//   msg("doImports enter\n");
    for (thunk_rec *tr = pe.imports; tr; tr = tr->next) {
       HandleNode *m = addModule(tr->dll_name, false, 0);
 
@@ -4133,7 +4141,7 @@ void doImports(PETables &pe) {
             f = myGetProcAddress(m->handle, fname);
 //            reverseLookupExport((unsigned int)f);
          }
-//         msg("found %x for %s slot %x\n", f, fname, slot);
+//         msg("found %x for %x slot %x\n", f, fname, slot);
          do_unknown(slot, 0);
          doDwrd(slot, 4);
          put_long(slot, f);
@@ -4145,6 +4153,7 @@ void doImports(PETables &pe) {
          }
       }
    }
+//   msg("doImports exit\n");
 }
 
 //okay to call for ELF, but module list should be empty

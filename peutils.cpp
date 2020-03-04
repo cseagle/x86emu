@@ -1,19 +1,19 @@
 /*
    Source for x86 emulator IdaPro plugin
    Copyright (c) 2005-2010 Chris Eagle
-   
+
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2 of the License, or (at your option) 
+   Software Foundation; either version 2 of the License, or (at your option)
    any later version.
-   
+
    This program is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
    more details.
-   
-   You should have received a copy of the GNU General Public License along with 
-   this program; if not, write to the Free Software Foundation, Inc., 59 Temple 
+
+   You should have received a copy of the GNU General Public License along with
+   this program; if not, write to the Free Software Foundation, Inc., 59 Temple
    Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
@@ -54,7 +54,7 @@
 #include "x86defs.h"
 
 #ifndef DEBUG
-//#define DEBUG 1
+#define DEBUG 1
 #endif
 
 //from emufuncs.h
@@ -93,21 +93,22 @@ void applyPEHeaderTemplates(unsigned int mz_addr) {
    tid_t inth = import_type(ti, -1, "IMAGE_NT_HEADERS");
    tid_t ish = import_type(ti, -1, "IMAGE_SECTION_HEADER");
 #endif
-   
+
    doStruct(mz_addr, sizeof(_IMAGE_DOS_HEADER), idh);
    unsigned short e_lfanew = get_word(mz_addr + 0x3C);
    mz_addr += e_lfanew;
 
-   if (doStruct(mz_addr, sizeof(_IMAGE_NT_HEADERS), inth) == 0) {
+   if (doStruct(mz_addr, sizeof(IMAGE_NT_HEADERS32), inth) == 0) {
       do_unknown(mz_addr, 0);
       set_cmt(mz_addr - e_lfanew, "!!Warning, MZ Header overlaps PE header!!", 0);
-      doStruct(mz_addr, sizeof(_IMAGE_NT_HEADERS), inth);
+      doStruct(mz_addr, sizeof(IMAGE_NT_HEADERS32), inth);
    }
 
-   unsigned short num_sects = get_word(mz_addr + 6);
+   unsigned int num_sects = get_word(mz_addr + 6);
+   unsigned int opt_header_size = get_word(mz_addr + 20);
 
-   mz_addr += sizeof(_IMAGE_NT_HEADERS);
-   
+   mz_addr += sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER) + opt_header_size;
+
    for (unsigned short i = 0; i < num_sects; i++) {
       doStruct(mz_addr + i * sizeof(_IMAGE_SECTION_HEADER), sizeof(_IMAGE_SECTION_HEADER), ish);
    }
@@ -138,13 +139,13 @@ void zero_fill(ea_t base, size_t size) {
    load_binary_file(ftmp, fin, 0, 0, 0, base, size);
    close_linput(fin);
 #ifdef __NT__
-   DeleteFile(ftmp);   
+   DeleteFile(ftmp);
 #else
    unlink(ftmp);
 #endif
 }
 
-void createSegment(unsigned int start, unsigned int size, unsigned char *content, 
+void createSegment(unsigned int start, unsigned int size, unsigned char *content,
                    unsigned int clen, const char *name) {
    segment_t s;
    memset(&s, 0, sizeof(s));
@@ -176,7 +177,7 @@ void createSegment(unsigned int start, unsigned int size, unsigned char *content
 PETables::PETables() {
    valid = 0;
    base = 0;
-   nt = (_IMAGE_NT_HEADERS*)malloc(sizeof(_IMAGE_NT_HEADERS));
+   nt = (IMAGE_NT_HEADERS32*)malloc(sizeof(IMAGE_NT_HEADERS32));
    sections = NULL;
    num_sections = 0;
    imports = NULL;
@@ -209,7 +210,7 @@ unsigned int PETables::rvaToFileOffset(unsigned int rva) {
 /*
    int i;
    if (valid) {
-      return 
+      return
       for (i = 0; i < num_sections; i++) {
          unsigned int max = sections[i].VirtualAddress + sections[i].Misc.VirtualSize;
          if (rva >= sections[i].VirtualAddress && rva < max) {
@@ -221,8 +222,8 @@ unsigned int PETables::rvaToFileOffset(unsigned int rva) {
 */
 }
 
-void PETables::setNtHeaders(_IMAGE_NT_HEADERS *inth) {
-   memcpy(nt, inth, sizeof(_IMAGE_NT_HEADERS));
+void PETables::setNtHeaders(IMAGE_NT_HEADERS32 *inth) {
+   memcpy(nt, inth, sizeof(IMAGE_NT_HEADERS32));
    base = nt->OptionalHeader.ImageBase;
 }
 
@@ -253,11 +254,33 @@ void PETables::setSectionHeaders(unsigned int nsecs, _IMAGE_SECTION_HEADER *ish)
 }
 
 void PETables::buildThunks(FILE *f) {
-   unsigned int import_rva, min_rva = 0xFFFFFFFF, max_rva = 0;
-   unsigned int min_iat = 0xFFFFFFFF, max_iat = 0;
+   unsigned int import_rva = 0;
+   unsigned int import_size = 0;
+   unsigned int min_rva = 0xFFFFFFFF;
+   unsigned int max_rva = 0;
+   unsigned int min_iat = 0xFFFFFFFF;
+   unsigned int max_iat = 0;
+   unsigned short snum;
    _IMAGE_IMPORT_DESCRIPTOR desc;
 
+   msg("buildThunks enter\n");
+
    import_rva = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+   import_size = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size;
+
+   for (snum = 0; snum < num_sections; snum++) {
+      unsigned int send = sections[snum].VirtualAddress + sections[snum].SizeOfRawData;
+      if (import_rva >= sections[snum].VirtualAddress && import_rva < send) {
+         msg("import rva is in section %hu\n", snum);
+         break;
+      }
+   }
+
+   if (snum == num_sections) {
+      //import_rva does not reside within any section
+      return;
+   }
+
    if (import_rva) {
       msg("import_rva = %x, image_base = %x\n", import_rva, (unsigned int)nt->OptionalHeader.ImageBase);
       import_rva = rvaToFileOffset(import_rva);
@@ -298,7 +321,7 @@ void PETables::buildThunks(FILE *f) {
          }
          tr->iat_base = iat_base;
          if (iat_base < min_iat) min_iat = iat_base;
-         
+
          tr->next = imports;
          imports = tr;
          if (fseek(f, name, SEEK_SET))  {
@@ -338,7 +361,7 @@ void PETables::buildThunks(FILE *f) {
          }
          unsigned int end_iat = iat_base + 4 * tr->iat_size;
          if (end_iat > max_iat) max_iat = end_iat;
-         
+
 //         tr->names = (char**)calloc(tr->iat_size, sizeof(char*));
          for (int i = 0; tr->iat[i]; i++) {
             unsigned int name_rva = tr->iat[i];
@@ -381,6 +404,8 @@ void PETables::buildThunks(FILE *f) {
          createSegment(base + min_iat, max_iat - min_iat, NULL);
       }
    }
+
+   msg("buildThunks exit\n");
 }
 
 void PETables::loadTables(Buffer &b) {
@@ -499,25 +524,35 @@ void PETables::destroy() {
 
 unsigned int loadIntoIdb(FILE *dll) {
    _IMAGE_DOS_HEADER dos, *pdos;
-   _IMAGE_NT_HEADERS nt, *pnt;
+   IMAGE_NT_HEADERS32 nt, *pnt;
    _IMAGE_SECTION_HEADER sect, *psect;
    unsigned int exp_size, exp_rva, exp_fileoff;
    _IMAGE_EXPORT_DIRECTORY *expdir = NULL;
    unsigned int len, handle;
-   
+
    if (fread(&dos, sizeof(_IMAGE_DOS_HEADER), 1, dll) != 1) {
+      msg("loadIntoIdb bad MZ read\n");
       return 0xFFFFFFFF;
    }
    if (dos.e_magic != 0x5A4D || fseek(dll, dos.e_lfanew, SEEK_SET)) {
+      msg("loadIntoIdb bad MZ magic\n");
       return 0xFFFFFFFF;
    }
-   if (fread(&nt, sizeof(_IMAGE_NT_HEADERS), 1, dll) != 1) {
+   if (fread(&nt, sizeof(IMAGE_NT_HEADERS32), 1, dll) != 1) {
+      msg("loadIntoIdb bad PE read\n");
       return 0xFFFFFFFF;
    }
    if (nt.Signature != 0x4550) {
+      msg("loadIntoIdb bad PE magic\n");
+      return 0xFFFFFFFF;
+   }
+   if (fseek(dll, dos.e_lfanew + sizeof(nt.Signature) + sizeof(nt.FileHeader) +
+             nt.FileHeader.SizeOfOptionalHeader, SEEK_SET)) {
+      msg("loadIntoIdb bad section header seek\n");
       return 0xFFFFFFFF;
    }
    if (fread(&sect, sizeof(_IMAGE_SECTION_HEADER), 1, dll) != 1) {
+      msg("loadIntoIdb bad section header read\n");
       return 0xFFFFFFFF;
    }
    //read all header bytes into buff
@@ -528,7 +563,7 @@ unsigned int loadIntoIdb(FILE *dll) {
       return 0xFFFFFFFF;
    }
    pdos = (_IMAGE_DOS_HEADER*)dat;
-   pnt = (_IMAGE_NT_HEADERS*)(dat + pdos->e_lfanew);
+   pnt = (IMAGE_NT_HEADERS32*)(dat + pdos->e_lfanew);
    handle = pnt->OptionalHeader.ImageBase;
    psect = (_IMAGE_SECTION_HEADER*)(pnt + 1);
 
@@ -597,7 +632,7 @@ unsigned int loadIntoIdb(FILE *dll) {
       free(expdir);
       return 0xFFFFFFFF;
    }
-   
+
    createSegment(handle + exp_rva, exp_size, (unsigned char*)expdir);
 
    if (expdir->AddressOfFunctions < exp_rva || expdir->AddressOfFunctions >= (exp_rva + exp_size)) {
