@@ -174,6 +174,8 @@ unsigned int peImageBase;
 //set to true if saved emulator state is found
 bool cpuInit = false;
 
+static bool base_loaded = false;
+
 //functions to create header segments and load header bytes
 //from original binary into Ida database.
 unsigned int PELoadHeaders(void);
@@ -1466,8 +1468,7 @@ void check_auto_cgc() {
 
 void setPEimageBase() {
    netnode pe_node("$ PE header");
-   peImageBase = (unsigned int)pe_node.altval((nodeidx_t)-2);
-
+   peImageBase = (unsigned int)pe_node.altval((nodeidx_t)0xfffffffe);
    if (peImageBase == 0) {
       //could not find $ PE header
       segment_t *h = getnseg(0);   //peek at first segment
@@ -1482,6 +1483,7 @@ void setPEimageBase() {
 }
 
 static void loadBaseCommon() {
+   base_loaded = true;
    if (current_filetype == f_PE) {
       setPEimageBase();
       //there has got to be a better way to choose til
@@ -1502,6 +1504,9 @@ static void loadBaseCommon() {
    else if (current_filetype == f_PDF) {
       peImageBase = 0x400000;
       init_til("mssdk.til");
+   }
+   else {
+      msg("x86emu Failed to identify file type\n");
    }
 
    setUnemulatedCB(EmuUnemulatedCB);
@@ -1535,7 +1540,7 @@ static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
 #ifdef DEBUG
       msg(PLUGIN_NAME": newfile notification\n");
 #endif
-      loadBaseCommon();
+//      loadBaseCommon();
       break;
    }
 #if IDA_SDK_VERSION < 700
@@ -1895,7 +1900,8 @@ unsigned int PELoadHeaders() {
       get_many_bytes(addr + pe_offset, &nt, sizeof(nt));
 
       IMAGE_SECTION_HEADER *sect = new IMAGE_SECTION_HEADER[nt.FileHeader.NumberOfSections];
-      get_many_bytes(addr + pe_offset + sizeof(nt), sect, sizeof(IMAGE_SECTION_HEADER) * nt.FileHeader.NumberOfSections);
+      unsigned int opt_header_size = nt.FileHeader.SizeOfOptionalHeader;
+      get_many_bytes(addr + pe_offset + 24 + opt_header_size, sect, sizeof(IMAGE_SECTION_HEADER) * nt.FileHeader.NumberOfSections);
 
       pe.setBase(nt.OptionalHeader.ImageBase);
       pe.setNtHeaders(&nt);
@@ -2841,12 +2847,6 @@ int idaapi init(void) {
 
    if (ph.id != PLFM_386) return PLUGIN_SKIP;
 
-#if IDA_SDK_VERSION < 730
-   current_filetype = inf.filetype;
-#else
-   current_filetype = inf_get_filetype();
-#endif
-
 //   msg(PLUGIN_NAME": hooking idp\n");
    hook_to_notification_point(HT_IDP, idpCallback, NULL);
    idpHooked = true;
@@ -2937,7 +2937,19 @@ void idaapi run(int /*arg*/) {
       return;
 #endif
    }
+
+#if IDA_SDK_VERSION < 730
+   current_filetype = inf.filetype;
+#else
+   current_filetype = inf_get_filetype();
+#endif
+
    cacheMainWindowHandle();
+
+   if (!base_loaded) {
+      loadBaseCommon();
+   }
+
    if (!isWindowCreated) {
       if (!netnode_exist(x86emu_node)) {
 #if 0
@@ -3070,12 +3082,14 @@ void idaapi run(int /*arg*/) {
          x86emu_node.altset(OS_PERSONALITY, os_personality);
       }
 
-      //test for presence of personality
-      //show personality dialog based on file type
-      //differs for PE vs ELF
-      //for ELF differs for Linux vs FreeBSD
-      //create personality, heap, peb, teb
-      //choose CPUID features regardless of file type
+      // TODO list
+      // 1) test for presence of personality
+      // 2) show personality dialog based on file type
+      // 3) differs for PE vs ELF
+      // 4) for ELF differs for Linux vs FreeBSD
+      // 5) create personality, heap, peb, teb
+      // 6) choose CPUID features regardless of file type
+
       unsigned int init_eip = (unsigned int)get_screen_ea();
       unsigned int elf_base = 0;
       if (current_filetype == f_PE && !netnode_exist(petable_node)) {

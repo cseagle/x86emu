@@ -74,10 +74,12 @@ macx:QMAKE_CXXFLAGS += -m64 -F$${QT_LOC}
 
 linux-g++:QMAKE_CXXFLAGS = -m64
 
+SDKVER = $$(IDAVER)
 linux-g++|macx: {
    QMAKE_CXXFLAGS += -m64
    QMAKE_CFLAGS += -m64
    QMAKE_LFLAGS += -m64
+   greaterThan(SDKVER, 720):QMAKE_CXXFLAGS += -std=c++11
 }
 
 macx:QMAKE_LFLAGS += -F$${IDA_APP}/Frameworks
