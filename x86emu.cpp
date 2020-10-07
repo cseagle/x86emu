@@ -2904,7 +2904,7 @@ bool emu_run_common(size_t /*arg*/) {
    }
 
 #if IDA_SDK_VERSION < 730
-   current_filetype = inf.filetype;
+   current_filetype = (filetype_t)inf.filetype;
 #else
    current_filetype = inf_get_filetype();
 #endif
