@@ -70,7 +70,7 @@ linux-g++:QMAKE_LIBDIR_QT =
 macx:QMAKE_INCDIR = $$makeIncludes(MODS)
 #add QTs actual include file location this way since -F is not
 #handled by QMAKE_INCDIR
-macx:QMAKE_CXXFLAGS += -m64 -F$${QT_LOC}
+macx:QMAKE_CXXFLAGS += -m64 -F$${QT_LOC} -stdlib=libc++
 
 linux-g++:QMAKE_CXXFLAGS = -m64
 
@@ -84,6 +84,7 @@ linux-g++|macx: {
 
 macx:QMAKE_LFLAGS += -F$${IDA_APP}/Frameworks
 macx:QMAKE_LIBDIR_QT =
+macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
 
 SOURCES = x86emu.cpp \
    x86emu_ui_qt.cpp \
