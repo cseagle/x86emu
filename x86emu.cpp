@@ -199,9 +199,9 @@ static bool ok_to_run = false;
 static bool already_run = false;
 
 #if IDA_SDK_VERSION >= 700
-bool idaapi run(size_t);
+bool idaapi emu_run_common(size_t);
 #else
-void idaapi run(int);
+void idaapi emu_run_common(int);
 #endif
 
 //tracking and tracing enable
@@ -1369,7 +1369,7 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
             ok_to_run = true;
             if (wants_to_run) {
                //run was called previously but need the UI to finish getting initialized
-               run(0);
+               emu_run_common(0);
             }
          }
          break;
@@ -2826,26 +2826,14 @@ bool haveHeapSegment() {
    return get_segm_by_name(".heap") != NULL;
 }
 
-//--------------------------------------------------------------------------
-//
-//      Initialize.
-//
-//      IDA will call this function only once.
-//      If this function returns PLGUIN_SKIP, IDA will never load it again.
-//      If this function returns PLUGIN_OK, IDA will unload the plugin but
-//      remember that the plugin agreed to work with the database.
-//      The plugin will be loaded again if the user invokes it by
-//      pressing the hotkey or selecting it from the menu.
-//      After the second load the plugin will stay on memory.
-//      If this function returns PLUGIN_KEEP, IDA will keep the plugin
-//      in the memory. In this case the initialization function can hook
-//      into the processor module and user interface notification points.
-//      See the hook_to_notification_point() function.
-//
-int idaapi init(void) {
+bool idaapi emu_init_common(void) {
    cpuInit = false;
 
-   if (ph.id != PLFM_386) return PLUGIN_SKIP;
+#if IDA_SDK_VERSION < 750
+   if (ph.id != PLFM_386) return false;
+#else
+   if (PH.id != PLFM_386) return false;
+#endif
 
 //   msg(PLUGIN_NAME": hooking idp\n");
    hook_to_notification_point(HT_IDP, idpCallback, NULL);
@@ -2856,16 +2844,10 @@ int idaapi init(void) {
    hook_to_notification_point(HT_UI, uiCallback, NULL);
    uiHooked = true;
 
-   return PLUGIN_KEEP;
+   return true;
 }
 
-//--------------------------------------------------------------------------
-//      Terminate.
-//
-//      IDA will call this function when the user asks to exit.
-//      This function won't be called in the case of emergency exits.
-
-void idaapi term(void) {
+void emu_term_common() {
 #ifdef DEBUG
    msg(PLUGIN_NAME": term entered\n");
 #endif
@@ -2910,24 +2892,7 @@ void idaapi term(void) {
 #endif
 }
 
-//--------------------------------------------------------------------------
-//
-//      The plugin method
-//
-//      This is the main function of plugin.
-//
-//      It will be called when the user selects the plugin.
-//
-//              arg - the input argument, it can be specified in
-//                    plugins.cfg file. The default is zero.
-//
-//
-
-#if IDA_SDK_VERSION >= 700
-bool idaapi run(size_t /*arg*/) {
-#else
-void idaapi run(int /*arg*/) {
-#endif
+bool emu_run_common(size_t /*arg*/) {
    if (!ok_to_run) {
       //need to wait for ui_ready_to_run
       wants_to_run = true;
@@ -2939,7 +2904,7 @@ void idaapi run(int /*arg*/) {
    }
 
 #if IDA_SDK_VERSION < 730
-   current_filetype = inf.filetype;
+   current_filetype = (filetype_t)inf.filetype;
 #else
    current_filetype = inf_get_filetype();
 #endif
@@ -3240,6 +3205,102 @@ void idaapi run(int /*arg*/) {
 #endif
 }
 
+#if IDA_SDK_VERSION >= 750
+
+struct emu_plugmod_t : public plugmod_t {
+  /// Invoke the plugin.
+  virtual bool idaapi run(size_t arg);
+
+  /// Virtual destructor.
+  virtual ~emu_plugmod_t();
+};
+
+plugmod_t *idaapi emu_init(void) {
+   if (emu_init_common()) {
+      return new emu_plugmod_t();
+   }
+   else {
+      return NULL;
+   }
+}
+
+emu_plugmod_t::~emu_plugmod_t(void) {
+   emu_term_common();
+}
+
+bool idaapi emu_plugmod_t::run(size_t arg) {
+   return emu_run_common(arg);
+}
+
+#define emu_run NULL
+#define emu_term NULL
+
+#else
+/** support for IDA < 7.5 **/
+
+//make life easier in a post 7.5 world
+#define PLUGIN_MULTI 0
+
+//--------------------------------------------------------------------------
+//
+//      Initialize.
+//
+//      IDA will call this function only once.
+//      If this function returns PLGUIN_SKIP, IDA will never load it again.
+//      If this function returns PLUGIN_OK, IDA will unload the plugin but
+//      remember that the plugin agreed to work with the database.
+//      The plugin will be loaded again if the user invokes it by
+//      pressing the hotkey or selecting it from the menu.
+//      After the second load the plugin will stay on memory.
+//      If this function returns PLUGIN_KEEP, IDA will keep the plugin
+//      in the memory. In this case the initialization function can hook
+//      into the processor module and user interface notification points.
+//      See the hook_to_notification_point() function.
+//
+int idaapi emu_init(void) {
+   if (emu_init_common()) {
+      return PLUGIN_KEEP;
+   }
+   else {
+      return PLUGIN_SKIP;
+   }
+}
+
+//--------------------------------------------------------------------------
+//      Terminate.
+//
+//      IDA will call this function when the user asks to exit.
+//      This function won't be called in the case of emergency exits.
+
+void idaapi emu_term(void) {
+   emu_term_common();
+}
+
+//--------------------------------------------------------------------------
+//
+//      The plugin method
+//
+//      This is the main function of plugin.
+//
+//      It will be called when the user selects the plugin.
+//
+//              arg - the input argument, it can be specified in
+//                    plugins.cfg file. The default is zero.
+//
+//
+
+#if IDA_SDK_VERSION >= 700
+bool idaapi emu_run(size_t arg) {
+   return emu_run_common(arg);
+}
+#else
+void idaapi emu_run(int arg) {
+   emu_run_common(arg);
+}
+#endif
+
+#endif
+
 //--------------------------------------------------------------------------
 char comment[] = "This is an x86 emulator";
 
@@ -3272,12 +3333,12 @@ char wanted_hotkey[] = "Alt-F8";
 
 plugin_t PLUGIN = {
   IDP_INTERFACE_VERSION,
-  PLUGIN_PROC,                    // plugin flags
-  init,                 // initialize
+  PLUGIN_PROC | PLUGIN_MULTI,   // plugin flags
+  emu_init,                 // initialize
 
-  term,                 // terminate. this pointer may be NULL.
+  emu_term,                 // terminate. this pointer may be NULL.
 
-  run,                  // invoke plugin
+  emu_run,                  // invoke plugin
 
   comment,              // long comment about the plugin
                         // it could appear in the status line

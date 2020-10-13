@@ -870,7 +870,7 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		sdk_versions.h \
 		x86emu_ui.h \
 		x86emu_ui_qt.h
-	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files (x86)/IdaPro/idasdk74/myplugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk74/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
+	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files (x86)/IdaPro/idasdk75/myplugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk75/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
