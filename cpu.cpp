@@ -1,6 +1,6 @@
 /*
    Source for x86 emulator
-   Copyright (c) 2003-2010 Chris Eagle
+   Copyright (c) 2003-2022 Chris Eagle
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -6057,19 +6057,11 @@ int executeInstruction() {
 //   msg("Start of instruction: %x\n", cpu.eip);
    if (doTrace) {
       traceLog("0x%08x:  ", instStart);
-#if IDA_SDK_VERSION >= 700
       qstring lbuf;
       if (generate_disasm_line(&lbuf, instStart, GENDSM_FORCE_CODE)) {
          tag_remove(&lbuf, lbuf);
          traceLog("%s\n", lbuf.c_str());
       }
-#else
-      char lbuf[1024];
-      if (generate_disasm_line(instStart, lbuf, sizeof(lbuf), GENDSM_FORCE_CODE)) {
-         tag_remove(lbuf, lbuf, sizeof(lbuf));
-         traceLog("%s\n", lbuf);
-      }
-#endif
       else {
          traceLog("\n");
       }

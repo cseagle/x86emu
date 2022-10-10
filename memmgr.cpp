@@ -1,7 +1,7 @@
 /*
    Source for x86 emulator IdaPro plugin
    File: memmgr.cpp
-   Copyright (c) 2004-2010, Chris Eagle
+   Copyright (c) 2004-2022, Chris Eagle
    
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -22,11 +22,7 @@
 
 #include <ida.hpp>
 #include <idp.hpp>
-#if IDA_SDK_VERSION >= 700
 #include <segregs.hpp>
-#else
-#include <srarea.hpp>
-#endif
 #include <segment.hpp>
 
 #include <stdint.h>
@@ -38,20 +34,8 @@
 //lifted from intel.hpp
 #define R_fs 33
 
-#if IDA_SDK_VERSION < 500
-#define SEGDEL_KEEP 0
-#define SEGDEL_SILENT 1
-#define SEGDEL_PERM 1
-#endif
-
-#if IDA_SDK_VERSION < 530
-#define SEGMOD_SILENT SEGDEL_SILENT
-#define SEGMOD_KEEP SEGDEL_KEEP
-#define SEGMOD_KILL SEGDEL_PERM
-#else
 #define SEGDEL_KEEP SEGMOD_KEEP
 #define SEGDEL_SILENT SEGMOD_SILENT
-#endif
 
 #define SEG_RESERVE 200
 
@@ -66,11 +50,7 @@ void createNewSegment(const char *name, uint32_t base, uint32_t size) {
    if (strcmp(name, ".teb") == 0) {
       haveTEB = true;
       tebSel = s.sel = allocate_selector(base >> 4);
-#if IDA_SDK_VERSION >= 650
       set_default_segreg_value(NULL, R_fs, s.sel);
-#else
-      SetDefaultRegisterValue(NULL, R_fs, s.sel);
-#endif
    }
    s.startEA = base;
    s.endEA = base + size;
@@ -86,11 +66,7 @@ void createNewSegment(const char *name, uint32_t base, uint32_t size) {
       //zero out the newly created segment
       zero_fill(base, size);
       if (haveTEB) {
-#if IDA_SDK_VERSION >= 650
          set_default_segreg_value(&s, R_fs, tebSel);
-#else
-         SetDefaultRegisterValue(&s, R_fs, tebSel);
-#endif
       }
    }
 }
@@ -112,31 +88,11 @@ void createOverlaySegment(const char *name, uint32_t base, uint32_t size) {
 }
 
 segment_t *next_seg(ea_t addr) {
-#if IDA_SDK_VERSION >= 530
    return get_next_seg(addr);
-#else
-   int snum = segs.get_next_area(addr);
-   if (snum == -1) {
-      return NULL;
-   }
-   else {
-      return getnseg(snum);
-   }
-#endif
 }
 
 segment_t *prev_seg(ea_t addr) {
-#if IDA_SDK_VERSION >= 530
    return get_prev_seg(addr);
-#else
-   int snum = segs.get_prev_area(addr);
-   if (snum == -1) {
-      return NULL;
-   }
-   else {
-      return getnseg(snum);
-   }
-#endif
 }
 
 /*
@@ -362,11 +318,7 @@ uint32_t MemMgr::munmap(uint32_t addr, uint32_t size, bool keep) {
    for (segment_t *s = getseg(addr); addr < end; s = getseg(addr)) {
       uint32_t segend = (uint32_t)s->endEA;
       if (s == NULL) {
-#if IDA_SDK_VERSION < 530
-         s = (segment_t *)segs.getn_area(segs.get_next_area(addr));
-#else
          s = get_next_seg(addr);
-#endif
          addr = s ? (uint32_t)s->startEA : end;
          continue;
       }

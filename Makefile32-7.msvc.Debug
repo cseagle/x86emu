@@ -856,6 +856,7 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -870,7 +871,7 @@ debug\moc_x86emu_ui_qt.cpp: C:\Qt\5.4.1\qtbase\include\QtGui\QtGui \
 		sdk_versions.h \
 		x86emu_ui.h \
 		x86emu_ui_qt.h
-	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files (x86)/IdaPro/idasdk75/myplugins/x86emu" -I"C:/Program Files (x86)/IdaPro/idasdk75/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
+	C:\Qt\5.4.1\qtbase\bin\moc.exe $(DEFINES) -D_MSC_VER=1800 -D_WIN32 -IC:/Qt/5.4.1/qtbase/mkspecs/win32-msvc2013 -I"C:/Program Files/IdaPro/idasdk_pro81/myplugins/x86emu" -I"C:/Program Files/IdaPro/idasdk_pro81/include" -IC:/Qt/5.4.1/qtbase/include -IC:/Qt/5.4.1/qtbase/include/QtWidgets -IC:/Qt/5.4.1/qtbase/include/QtGui -IC:/Qt/5.4.1/qtbase/include/QtCore x86emu_ui_qt.h -o debug\moc_x86emu_ui_qt.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -1547,6 +1548,7 @@ p32-7\x86emu.obj: x86emu.cpp image.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2277,6 +2279,7 @@ p32-7\x86emu_ui_qt.obj: x86emu_ui_qt.cpp C:\Qt\5.4.1\qtbase\include\QtCore\QtGlo
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2312,6 +2315,7 @@ p32-7\emufuncs.obj: emufuncs.cpp ..\..\include\pro.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2347,6 +2351,7 @@ p32-7\cpu.obj: cpu.cpp cpu.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2389,6 +2394,7 @@ p32-7\emuheap.obj: emuheap.cpp ..\..\include\ida.hpp \
 		x86defs.h \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\funcs.hpp \
 		..\..\include\bitrange.hpp \
 		..\..\include\config.hpp \
@@ -2400,6 +2406,7 @@ p32-7\memmgr.obj: memmgr.cpp ..\..\include\ida.hpp \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2426,6 +2433,7 @@ p32-7\seh.obj: seh.cpp cpu.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2448,6 +2456,7 @@ p32-7\break.obj: break.cpp ..\..\include\ida.hpp \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2471,6 +2480,7 @@ p32-7\hooklist.obj: hooklist.cpp x86defs.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2495,6 +2505,7 @@ p32-7\emuthreads.obj: emuthreads.cpp x86defs.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \
@@ -2528,6 +2539,7 @@ p32-7\peutils.obj: peutils.cpp image.h \
 		..\..\include\typeinf.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\funcs.hpp \
 		..\..\include\ua.hpp \
 		..\..\include\xref.hpp \
@@ -2546,6 +2558,7 @@ p32-7\emu_script.obj: emu_script.cpp ..\..\include\ida.hpp \
 		..\..\include\llong.hpp \
 		..\..\include\range.hpp \
 		..\..\include\expr.hpp \
+		..\..\include\ieee.h \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
 		..\..\include\nalt.hpp \
@@ -2572,6 +2585,7 @@ p32-7\context.obj: context.cpp cpu.h \
 		..\..\include\range.hpp \
 		..\..\include\idp.hpp \
 		..\..\include\fpro.h \
+		..\..\include\ieee.h \
 		..\..\include\nalt.hpp \
 		..\..\include\netnode.hpp \
 		..\..\include\segment.hpp \

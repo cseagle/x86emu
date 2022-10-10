@@ -1,6 +1,6 @@
 /*
    Source for x86 emulator IdaPro plugin
-   Copyright (c) 2005-2010 Chris Eagle
+   Copyright (c) 2005-2022 Chris Eagle
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -84,15 +84,9 @@ static char *stringFromFile(FILE *f) {
 }
 
 void applyPEHeaderTemplates(unsigned int mz_addr) {
-#if (IDA_SDK_VERSION < 520)
-   tid_t idh = til2idb(-1, "IMAGE_DOS_HEADER");
-   tid_t inth = til2idb(-1, "IMAGE_NT_HEADERS");
-   tid_t ish = til2idb(-1, "IMAGE_SECTION_HEADER");
-#else
    tid_t idh = import_type(ti, -1, "IMAGE_DOS_HEADER");
    tid_t inth = import_type(ti, -1, "IMAGE_NT_HEADERS");
    tid_t ish = import_type(ti, -1, "IMAGE_SECTION_HEADER");
-#endif
 
    doStruct(mz_addr, sizeof(_IMAGE_DOS_HEADER), idh);
    unsigned short e_lfanew = get_word(mz_addr + 0x3C);
@@ -575,11 +569,7 @@ unsigned int loadIntoIdb(FILE *dll) {
       msg("Trying base address of 0x%x\n", handle);
       segment_t *s = getseg(handle);
       if (s == NULL) {
-#if (IDA_SDK_VERSION < 530)
-         segment_t *n = (segment_t *)segs.getn_area(segs.get_next_area(handle));
-#else
          segment_t *n = get_next_seg(handle);
-#endif
          if (n != NULL) {
             unsigned int moduleEnd = getModuleEnd((unsigned int)n->startEA);
             if (moduleEnd == 0xffffffff) {

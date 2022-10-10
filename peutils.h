@@ -1,6 +1,6 @@
 /*
    Source for x86 emulator IdaPro plugin
-   Copyright (c) 2005-2010 Chris Eagle
+   Copyright (c) 2005-2022 Chris Eagle
    
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free

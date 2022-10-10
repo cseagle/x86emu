@@ -1,7 +1,7 @@
 /*
    Source for x86 emulator IdaPro plugin
    File: emufuncs.cpp
-   Copyright (c) 2004-2010, Chris Eagle
+   Copyright (c) 2004-2022, Chris Eagle
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -92,11 +92,6 @@
 #include <name.hpp>
 #include <typeinf.hpp>
 #include <segment.hpp>
-
-#if IDA_SDK_VERSION < 530
-#define SEGMOD_SILENT 0
-#define SEGMOD_KEEP 0
-#endif
 
 #ifndef DEBUG
 #define DEBUG 1
@@ -4230,10 +4225,6 @@ FunctionInfo *newFunctionInfo(const char *name) {
    f->result = 0;
    f->stackItems = 0;
    f->callingConvention = 0;
-#if IDA_SDK_VERSION < 650
-   f->type = NULL;
-   f->fields = NULL;
-#endif
    f->next = functionInfoList;
    functionInfoList = f;
    return f;
@@ -4249,8 +4240,6 @@ void clearFunctionInfoList(void) {
    }
    functionInfoList = NULL;
 }
-
-#if IDA_SDK_VERSION >= 650
 
 void getIdaTypeInfo(FunctionInfo *f) {
    cm_t cc;
@@ -4322,175 +4311,6 @@ char *getFunctionReturnType(FunctionInfo *f) {
    return NULL;
 }
 
-#elif IDA_SDK_VERSION >= 520
-
-void getIdaTypeInfo(FunctionInfo *f) {
-   cm_t cc;
-   const type_t *type;
-   const p_list *fields;
-   if (get_named_type(ti, f->fname, NTF_SYMU, &type, &fields) > 0) {
-      f->type = type;
-      f->fields = fields;
-      func_type_info_t info;
-      f->stackItems = calc_func_nargs(ti, type);
-      cc = get_cc(type[1]);
-      if (f->stackItems == 0xffffffffu) {
-         //just in case there was an error
-         f->stackItems = 0;
-      }
-      if (cc == CM_CC_STDCALL || cc == CM_CC_FASTCALL) {
-         f->callingConvention = CALL_STDCALL;
-      }
-      else {  //if (cc == CM_CC_CDECL || cc == CM_CC_VOIDARG) {
-         f->callingConvention = CALL_CDECL;
-      }
-   }
-}
-
-char *getFunctionPrototype(FunctionInfo *f) {
-   char *result = NULL;
-   char buf[512];
-   buf[0] = 0;
-   if (f && f->type) {
-      func_type_info_t info;
-      int ret = build_funcarg_info(ti, f->type, f->fields,
-                         &info, BFI_NOCONST);
-      if (ret >= 0) {
-         print_type_to_one_line(buf, sizeof(buf), ti, info.rettype.c_str());
-      }
-      result = _strdup(buf);
-      int len = (inr)strlen(result) + 3 + (int)strlen(f->fname);
-      result = (char*)realloc(result, len);
-      qstrncat(result, " ", len);
-      qstrncat(result, f->fname, len);
-      qstrncat(result, "(", len);
-
-      for (unsigned int i = 0; i < f->stackItems; i++) {
-         //change to incorporate what we know from Ida
-         print_type_to_one_line(buf, sizeof(buf), NULL, info[i].type.c_str());
-         len = (int)strlen(result) + 3 + (int)strlen(buf);
-         result = (char*)realloc(result, len);
-         if (i) {
-            qstrncat(result, ",", len);
-         }
-         qstrncat(result, buf, len);
-      }
-      len = (int)strlen(result) + 2;
-      result = (char*)realloc(result, len);
-      qstrncat(result, ")", len);
-   }
-   return result;
-}
-
-char *getFunctionReturnType(FunctionInfo *f) {
-   char buf[512];
-   if (f && f->type) {
-      func_type_info_t info;
-      int ret = build_funcarg_info(ti, f->type, f->fields,
-                         &info, BFI_NOCONST);
-      if (ret >= 0) {
-         print_type_to_one_line(buf, sizeof(buf), ti, info.rettype.c_str());
-         return _strdup(buf);
-      }
-   }
-   return NULL;
-}
-
-#else
-
-void getIdaTypeInfo(FunctionInfo *f) {
-   cm_t cc;
-   const type_t *type;
-   const p_list *fields;
-   if (get_named_type(ti, f->fname, NTF_SYMU, &type, &fields) > 0) {
-      f->type = type;
-      f->fields = fields;
-      ulong arglocs[20];
-      type_t *types[20];
-      char *names[20];
-      f->stackItems = build_funcarg_arrays(type,
-                            fields,
-                            arglocs,        // pointer to array of parameter locations
-                            types,        // pointer to array of parameter types
-                            names,          // pointer to array of parameter names
-                            20,           // size of these arrays
-                            true);// remove constness from
-      if (f->stackItems >= 1) {
-         free_funcarg_arrays(types, names, f->stackItems);
-      }
-      cc = get_cc(type[1]);
-      if (f->stackItems == 0xffffffffu) {
-         //just in case there was an error
-         f->stackItems = 0;
-      }
-      if (cc == CM_CC_STDCALL || cc == CM_CC_FASTCALL) {
-         f->callingConvention = CALL_STDCALL;
-      }
-      else {  //if (cc == CM_CC_CDECL || cc == CM_CC_VOIDARG) {
-         f->callingConvention = CALL_CDECL;
-      }
-   }
-}
-
-char *getFunctionPrototype(FunctionInfo *f) {
-   char *result = NULL;
-   char buf[512];
-   buf[0] = 0;
-   if (f && f->type) {
-      ulong arglocs[20];
-      type_t *types[20];
-      char *names[20];
-      type_t rettype[512];
-      type_t *ret = extract_func_ret_type(f->type, rettype, sizeof(rettype));
-      if (ret) {
-         print_type_to_one_line(buf, sizeof(buf), ti, rettype);
-      }
-      result = _strdup(buf);
-      int len = (int)strlen(result) + 3 + (int)strlen(f->fname);
-      result = (char*)realloc(result, len);
-      qstrncat(result, " ", len);
-      qstrncat(result, f->fname, len);
-      qstrncat(result, "(", len);
-
-      if (f->stackItems) {
-         build_funcarg_arrays(f->type, f->fields, arglocs,
-                              types, names, 20, true);
-      }
-      for (unsigned int i = 0; i < f->stackItems; i++) {
-         //change to incorporate what we know from Ida
-         print_type_to_one_line(buf, sizeof(buf), NULL, types[i]);
-         len = (int)strlen(result) + 3 + (int)strlen(buf);
-         result = (char*)realloc(result, len);
-         if (i) {
-            qstrncat(result, ",", len);
-         }
-         qstrncat(result, buf, len);
-      }
-      len = (int)strlen(result) + 2;
-      result = (char*)realloc(result, len);
-      qstrncat(result, ")", len);
-      if (f->stackItems) {
-         free_funcarg_arrays(types, names, f->stackItems);
-      }
-   }
-   return result;
-}
-
-char *getFunctionReturnType(FunctionInfo *f) {
-   char buf[512];
-   if (f && f->type) {
-      type_t rettype[512];
-      type_t *ret = extract_func_ret_type(f->type, rettype, sizeof(rettype));
-      if (ret) {
-         print_type_to_one_line(buf, sizeof(buf), ti, rettype);
-         return _strdup(buf);
-      }
-   }
-   return NULL;
-}
-
-#endif
-
 FunctionInfo *getFunctionInfo(const char *name) {
    FunctionInfo *f;
    for (f = functionInfoList; f; f = f->next) {
@@ -4549,10 +4369,6 @@ void loadFunctionInfo(Buffer &b) {
       b.read(&f->result, sizeof(f->result));
       b.read(&f->stackItems, sizeof(f->stackItems));
       b.read(&f->callingConvention, sizeof(f->callingConvention));
-#if IDA_SDK_VERSION < 650
-      f->type = NULL;
-      f->fields = NULL;
-#endif
       f->next = functionInfoList;
       getIdaTypeInfo(f);
       functionInfoList = f;
@@ -4560,25 +4376,8 @@ void loadFunctionInfo(Buffer &b) {
 }
 
 void init_til(const char *tilFile) {
-#if IDA_SDK_VERSION >= 700
    qstring errbuf;
    ti = load_til(tilFile, &errbuf);
-#else
-   char err[256];
-   *err = 0;
-#if IDA_SDK_VERSION < 695
-
-#if IDA_SDK_VERSION < 470
-   char *tilpath = get_tilpath();
-#elif IDA_SDK_VERSION < 695
-   char tilpath[260];
-   get_tilpath(tilpath, sizeof(tilpath));
-#endif
-   ti = load_til(tilpath, tilFile, err, sizeof(err));
-#else
-   ti = load_til2(tilFile, err, sizeof(err));
-#endif
-#endif
 }
 
 void emu_exit(unsigned int retval) {
@@ -5249,17 +5048,9 @@ void syscall() {
             case LINUX_SYS_BRK: { //45
                unsigned int cbrk = (unsigned int)kernel_node.altval(OS_LINUX_BRK);
 //               segment_t *s = getseg(cbrk - 1);
-#if IDA_SDK_VERSION > 520
                segment_t *s = get_prev_seg(ebx);
-#else
-               segment_t *s = (segment_t *)segs.getn_area(segs.get_prev_area(ebx));
-#endif
                if (ebx && ebx != cbrk) {
-#if IDA_SDK_VERSION < 730
-                  uint32_t omax_ea = (uint32_t)inf.omax_ea;
-#else
                   uint32_t omax_ea = (uint32_t)inf_get_omax_ea();
-#endif
                   if (ebx > omax_ea) {
                      unsigned int newbrk = (ebx + 0xfff) & ~0xfff;
                      if (s) {

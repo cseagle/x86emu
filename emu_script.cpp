@@ -1,6 +1,6 @@
 /*
    Scripting support for the x86 emulator IdaPro plugin
-   Copyright (c) 2008-2010 Chris Eagle
+   Copyright (c) 2008-2022 Chris Eagle
    
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -24,12 +24,6 @@
 #include "emu_script.h"
 #include "sdk_versions.h"
 
-#if IDA_SDK_VERSION < 520
-typedef value_t idc_value_t;
-#endif
-
-#if IDA_SDK_VERSION >= 700
-
 bool set_idc_func_ex(const char *name, idc_func_t *fp, const char *args, int extfunc_flags) {
    ext_idcfunc_t func;
    func.name = name;
@@ -40,8 +34,6 @@ bool set_idc_func_ex(const char *name, idc_func_t *fp, const char *args, int ext
    func.flags = extfunc_flags;
    return add_idc_func(func);
 }
-
-#endif
 
 /*
  * prototypes for functions in x86emu.cpp that we use
@@ -204,16 +196,6 @@ void register_funcs() {
 //   static const char idc_str_args[] = { VT_STR, 0 };
    static const char idc_long[] = { VT_LONG, 0 };
    static const char idc_long_long[] = { VT_LONG, VT_LONG, 0 };
-#if IDA_SDK_VERSION < 570
-   set_idc_func("EmuRun", idc_emu_run, idc_void);
-   set_idc_func("EmuTrace", idc_emu_trace, idc_void);
-   set_idc_func("EmuStepOne", idc_emu_step, idc_void);
-   set_idc_func("EmuTraceOne", idc_emu_trace_one, idc_void);
-   set_idc_func("EmuSync", idc_emu_sync, idc_void);
-   set_idc_func("EmuGetReg", idc_emu_getreg, idc_long);
-   set_idc_func("EmuSetReg", idc_emu_setreg, idc_long_long);
-   set_idc_func("EmuAddBpt", idc_emu_addbpt, idc_long);
-#else
    set_idc_func_ex("EmuRun", idc_emu_run, idc_void, EXTFUN_BASE);
    set_idc_func_ex("EmuTrace", idc_emu_trace, idc_void, EXTFUN_BASE);
    set_idc_func_ex("EmuStepOne", idc_emu_step, idc_void, EXTFUN_BASE);
@@ -222,23 +204,12 @@ void register_funcs() {
    set_idc_func_ex("EmuGetReg", idc_emu_getreg, idc_long, EXTFUN_BASE);
    set_idc_func_ex("EmuSetReg", idc_emu_setreg, idc_long_long, EXTFUN_BASE);
    set_idc_func_ex("EmuAddBpt", idc_emu_addbpt, idc_long, EXTFUN_BASE);
-#endif
 }
 
 /*
  * Unregister IDC functions when the plugin is unloaded
  */
 void unregister_funcs() {
-#if IDA_SDK_VERSION < 570
-   set_idc_func("EmuRun", NULL, NULL);
-   set_idc_func("EmuTrace", NULL, NULL);
-   set_idc_func("EmuStepOne", NULL, NULL);
-   set_idc_func("EmuTraceOne", NULL, NULL);
-   set_idc_func("EmuSync", NULL, NULL);
-   set_idc_func("EmuGetReg", NULL, NULL);
-   set_idc_func("EmuSetReg", NULL, NULL);
-   set_idc_func("EmuAddBpt", NULL, NULL);
-#else
    set_idc_func_ex("EmuRun", NULL, NULL, 0);
    set_idc_func_ex("EmuTrace", NULL, NULL, 0);
    set_idc_func_ex("EmuStepOne", NULL, NULL, 0);
@@ -247,5 +218,4 @@ void unregister_funcs() {
    set_idc_func_ex("EmuGetReg", NULL, NULL, 0);
    set_idc_func_ex("EmuSetReg", NULL, NULL, 0);
    set_idc_func_ex("EmuAddBpt", NULL, NULL, 0);
-#endif
 }

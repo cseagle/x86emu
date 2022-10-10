@@ -1,6 +1,6 @@
 /*
    Source for x86 emulator IdaPro plugin
-   Copyright (c) 2003-2010 Chris Eagle
+   Copyright (c) 2003-2022 Chris Eagle
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the Free
@@ -64,11 +64,7 @@
 #include <typeinf.hpp>
 #include <nalt.hpp>
 #include <segment.hpp>
-#if IDA_SDK_VERSION >= 700
 #include <segregs.hpp>
-#else
-#include <srarea.hpp>
-#endif
 #include <typeinf.hpp>
 #include <struct.hpp>
 #include <entry.hpp>
@@ -103,27 +99,8 @@
 
 void memoryAccessException();
 
-#if IDA_SDK_VERSION >= 530
-#if IDA_SDK_VERSION >= 700
 TWidget *mainForm;
 TWidget *stackCC;
-#else
-TForm *mainForm;
-TCustomControl *stackCC;
-#endif
-#else
-#define SEGMOD_SILENT 0
-#define SEGMOD_KEEP 0
-segment_t *get_first_seg(void) {
-   int nseg = segs.get_next_area(0);
-   return (segment_t*)segs.getn_area(nseg);
-}
-
-segment_t *get_last_seg(void) {
-   int nseg = segs.get_prev_area(0xffffffff);
-   return (segment_t*)segs.getn_area(nseg);
-}
-#endif
 
 #ifdef __NT__
 HCRYPTPROV hProv;
@@ -191,18 +168,10 @@ static char **mainArgs;
 static uint32_t elf_entry = 0;
 
 static bool wants_to_run = false;
-#if IDA_SDK_VERSION < 520
-static bool ok_to_run = true;  //older SDKs don't have ui_ready_to_run
-#else
 static bool ok_to_run = false;
-#endif
 static bool already_run = false;
 
-#if IDA_SDK_VERSION >= 700
 bool idaapi emu_run_common(size_t);
-#else
-void idaapi emu_run_common(int);
-#endif
 
 //tracking and tracing enable
 bool doTrace = false;
@@ -231,11 +200,7 @@ bool isWindowCreated = false;
 
 filetype_t current_filetype;
 
-#if IDA_SDK_VERSION >= 700
 static ssize_t idaapi idpCallback(void * cookie, int code, va_list va);
-#else
-static int idaapi idpCallback(void * cookie, int code, va_list va);
-#endif
 
 void getRandomBytes(void *buf, unsigned int len) {
 #ifdef __NT__
@@ -423,42 +388,6 @@ void syncDisplay() {
       updateRegisterDisplay(i);
    }
 
-#if IDA_SDK_VERSION < 510
-   // < 510 means there is not HT_IDB so we need to try to do this ourselves
-   static unsigned int lastEsp = 0;
-   if (esp != lastEsp) {
-      segment_t *s = get_segm_by_name(".stack");
-      unsigned int b = esp;
-      unsigned int e = lastEsp;
-      if (esp > lastEsp) {
-         e = esp;
-         b = lastEsp;
-      }
-      if (b < s->startEA) {
-         b = (unsigned int)s->startEA;
-      }
-      if (e > s->endEA) {
-         e = (unsigned int)s->endEA;
-      }
-      for (unsigned int a = b; a < e; a += 4) {
-         unsigned int val = get_long(a);
-         segment_t *seg = getseg(val);
-         if (seg) {
-            char name[256];
-            ssize_t s = get_nice_colored_name(val, name, sizeof(name), GNCN_NOCOLOR);
-            if (s != 0) {
-               set_cmt(a, name, false);
-            }
-         }
-      }
-      lastEsp = esp;
-   }
-#else
-   // > 510 means there is HT_IDB and idb_hook will handle adding comments
-   //whenever stack value is changed.  If also >=520, then we have opened
-   //a stack display in which we can set the cursor.
-#if IDA_SDK_VERSION >= 530
-//   segment_t *s = get_segm_by_name(".stack");
    segment_t *s = getseg(esp);
    if (s) {
       //make sure stack view exists
@@ -468,18 +397,12 @@ void syncDisplay() {
       }
    }
    switchto_tform(mainForm, false);
-#endif
-#endif
    jumpto(cpu.eip);
 }
 
 //force conversion to code at the current eip location
 void forceCode() {
-#if IDA_SDK_VERSION >= 540
    int len = create_insn(cpu.eip);
-#else
-   int len = ua_ana0(cpu.eip);
-#endif
 #ifdef DOUNK_EXPAND
    do_unknown_range(cpu.eip, len, DOUNK_EXPAND | DOUNK_DELNAMES);
 #else
@@ -506,11 +429,7 @@ void codeCheck(void) {
    }
 /*
    int len1 = get_item_size(loc);
-#if IDA_SDK_VERSION >= 540
    int len2 = create_insn(loc);
-#else
-   int len2 = ua_ana0(loc);
-#endif
    if (len1 != len2) {
       forceCode(); //or ua_code(loc);
    }
@@ -609,11 +528,7 @@ void dumpRange(ea_t low, ea_t hi) {
 //ask user for an address range and dump that address range
 //to a user named file;
 void dumpRange() {
-#if IDA_SDK_VERSION < 730
-   dumpRange(get_screen_ea(), inf.min_ea);
-#else
    dumpRange(get_screen_ea(), inf_get_min_ea());
-#endif
 }
 
 //ask user for an address range and dump that address range
@@ -668,8 +583,6 @@ bool isStringPointer(const char *type_str) {
    return result;
 }
 
-#if IDA_SDK_VERSION >= 650
-
 void generateArgList(const char *func, argcallback_t cb, void *user) {
    char buf[256];
    int len = 8;
@@ -707,96 +620,6 @@ void generateArgList(const char *func, argcallback_t cb, void *user) {
       (*cb)(func, buf, i, user);
    }
 }
-
-#elif IDA_SDK_VERSION >= 520
-
-void generateArgList(const char *func, argcallback_t cb, void *user) {
-   char buf[256];
-   int len = 8;
-   FunctionInfo *f = getFunctionInfo(func);
-   if (f) {
-      len = f->stackItems;
-   }
-   func_type_info_t info;
-   int haveIdaTypeInfo = f && f->type && len;
-   if (haveIdaTypeInfo) {
-      build_funcarg_info(ti, f->type, f->fields,
-                         &info, BFI_NOCONST);
-   }
-   for (int i = 0; i < len; i++) {
-      unsigned int parm = readMem(esp + i * 4, SIZE_DWORD);
-      if (haveIdaTypeInfo) {
-         //change to incorporate what we know from Ida
-         char type_str[128];
-         print_type_to_one_line(type_str, sizeof(type_str), NULL, info[i].type.c_str());
-         ::qsnprintf(buf, sizeof(buf), "arg %d: 0x%8.8x  [%s %s]",
-                  i, parm, type_str, info[i].name.c_str());
-         if (isStringPointer(type_str)) {
-            //read string from database at address parm and append to buf
-            char *val = getString(parm);
-            qstrncat(buf, " '", sizeof(buf));
-            qstrncat(buf, val, sizeof(buf));
-            qstrncat(buf, "'", sizeof(buf));
-            free(val);
-         }
-      }
-      else {
-         ::qsnprintf(buf, sizeof(buf), "arg %d: 0x%8.8x", i, parm);
-      }
-      (*cb)(func, buf, i, user);
-   }
-}
-
-#else
-
-void generateArgList(const char *func, argcallback_t cb, void *user) {
-   char buf[256];
-   int len = 8;
-   FunctionInfo *f = getFunctionInfo(func);
-   if (f) {
-      len = f->stackItems;
-   }
-   ulong arglocs[20];
-   type_t *types[20];
-   char *names[20];
-   int haveIdaTypeInfo = f && f->type && len;
-   if (haveIdaTypeInfo) {
-      build_funcarg_arrays(f->type, f->fields, arglocs,
-                           types, names, 20, true);
-   }
-   for (int i = 0; i < len; i++) {
-      unsigned int parm = readMem(esp + i * 4, SIZE_DWORD);
-      if (haveIdaTypeInfo) {
-         //change to incorporate what we know from Ida
-         char type_str[128];
-         print_type_to_one_line(type_str, sizeof(type_str), NULL, types[i]);
-         ::qsnprintf(buf, sizeof(buf), "arg %d: 0x%8.8x  [%s %s]",
-                  i, parm, type_str, names[i] ? names[i] : "");
-         if (isStringPointer(type_str)) {
-            //read string from database at address parm and append to buf
-            char *val = getString(parm);
-#if IDA_SDK_VERSION < 480
-            int len = strlen(buf);
-            ::qsnprintf(buf + len, sizeof(buf) - len, " '%s'", val);
-#else
-            qstrncat(buf, " '", sizeof(buf));
-            qstrncat(buf, val, sizeof(buf));
-            qstrncat(buf, "'", sizeof(buf));
-#endif
-            free(val);
-         }
-      }
-      else {
-         ::qsnprintf(buf, sizeof(buf), "arg %d: 0x%8.8x", i, parm);
-      }
-      (*cb)(func, buf, i, user);
-   }
-   if (haveIdaTypeInfo) {
-      free_funcarg_arrays(types, names, len);
-   }
-}
-
-#endif
 
 /*
  * This function is used for all unemulated API functions
@@ -920,11 +743,7 @@ bool loadLibrary() {
             msg("Trying base address of 0x%x\n", loadBase);
             segment_t *s = getseg(loadBase);
             if (s == NULL) {
-#if (IDA_SDK_VERSION < 530)
-               segment_t *n = (segment_t *)segs.getn_area(segs.get_next_area(loadBase));
-#else
                segment_t *n = get_next_seg(loadBase);
-#endif
                if (n != NULL) {
                   uint32_t moduleEnd = getModuleEnd((uint32_t)n->startEA);
                   if (moduleEnd == 0xffffffff) {
@@ -989,17 +808,10 @@ bool loadLibrary() {
          unsigned int oep = pe.nt->OptionalHeader.ImageBase + pe.nt->OptionalHeader.AddressOfEntryPoint;
 
          //set segment registers on new segment to match ES, DS, SS
-#if IDA_SDK_VERSION >= 650
          set_default_segreg_value(s, R_ds, get_segreg(oep, R_ds));
          set_default_segreg_value(s, R_es, get_segreg(oep, R_es));
          set_default_segreg_value(s, R_cs, get_segreg(oep, R_cs));
          set_default_segreg_value(s, R_ss, get_segreg(oep, R_ss));
-#else
-         SetDefaultRegisterValue(s, R_ds, getSR(oep, R_ds));
-         SetDefaultRegisterValue(s, R_es, getSR(oep, R_es));
-         SetDefaultRegisterValue(s, R_cs, getSR(oep, R_cs));
-         SetDefaultRegisterValue(s, R_ss, getSR(oep, R_ss));
-#endif
          unsigned char *buf = (unsigned char*)qalloc(nt.OptionalHeader.SizeOfHeaders);
          qfseek(f, 0, SEEK_SET);
          qfread(f, buf, nt.OptionalHeader.SizeOfHeaders);
@@ -1311,11 +1123,7 @@ void trace() {
 // At the moment this is only used to catch the "saving" event
 // so that the plug-in can save its state in the database.
 //
-#if IDA_SDK_VERSION >= 700
 static ssize_t idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
-#else
-static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
-#endif
    switch (code) {
       case ui_saving: {
          //
@@ -1361,7 +1169,6 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
          }
          break;
       }
-#if IDA_SDK_VERSION >= 520
       case ui_ready_to_run:
          //try to prevent run from running before GUI is ready
          msg("ui_ready_to_run handled\n");
@@ -1373,7 +1180,6 @@ static int idaapi uiCallback(void * /*cookie*/, int code, va_list /*va*/) {
             }
          }
          break;
-#endif
       default:
          break;
    }
@@ -1523,17 +1329,9 @@ static void loadBaseCommon() {
 // At the moment this is only used to catch the "saving" event
 // so that the plug-in can save its state in the database.
 //
-#if IDA_SDK_VERSION >= 700
 static ssize_t idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
-#else
-static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
-#endif
    switch (code) {
-#if IDA_SDK_VERSION >= 700
    case processor_t::ev_newfile: {
-#else
-   case processor_t::newfile: {
-#endif
       //
       // a new database has been opened
       //
@@ -1543,22 +1341,14 @@ static int idaapi idpCallback(void * /*cookie*/, int code, va_list /*va*/) {
 //      loadBaseCommon();
       break;
    }
-#if IDA_SDK_VERSION < 700
-   case processor_t::closebase: {
-#else
    case idb_event::closebase: {
-#endif
 #ifdef DEBUG
       msg(PLUGIN_NAME": closebase notification\n");
 #endif
       clearFunctionInfoList();
       break;
    }
-#if IDA_SDK_VERSION >= 700
    case processor_t::ev_oldfile: {
-#else
-   case processor_t::oldfile: {
-#endif
       if (netnode_exist(module_node)) {
          // There's a module_node in the database.  Attempt to
          // instantiate the module info list from it.
@@ -1785,13 +1575,8 @@ void doExportLookup() {
 
 FILE *LoadHeadersCommon(unsigned int addr, segment_t &s, bool createSeg = true) {
    char buf[260];
-#if (IDA_SDK_VERSION < 490)
-   char *fname = get_input_file_path();
-   FILE *f = fopen(fname, "rb");
-#else
    get_input_file_path(buf, sizeof(buf));
    FILE *f = fopen(buf, "rb");
-#endif
    if (f == NULL) {
       showErrorMessage("Original input file not found.");
 #ifndef __QT__
@@ -1974,11 +1759,7 @@ unsigned int PELoadHeaders() {
 unsigned int ELFLoadHeaders(uint32_t magic) {
    segment_t s;
    uint32_t addr = (uint32_t)x86emu_node.altval(X86_ORIG_MINEA);
-#if IDA_SDK_VERSION < 730
-   uint32_t min_addr = (uint32_t)inf.min_ea;
-#else
    uint32_t min_addr = (uint32_t)inf_get_min_ea();
-#endif
    uint32_t base_addr = (uint32_t)min_addr;
    bool make_it = true;
    if (get_long(min_addr) == magic) {
@@ -1998,13 +1779,8 @@ unsigned int ELFLoadHeaders(uint32_t magic) {
       addr = (uint32_t)s.startEA;
       uint32_t need = (uint32_t)s.endEA - addr;
 
-#if (IDA_SDK_VERSION < 520)
-      tid_t elf_hdr = til2idb(-1, "Elf32_Ehdr");
-      tid_t elf_phdr = til2idb(-1, "Elf32_Phdr");
-#else
       tid_t elf_hdr = import_type(ti, -1, "Elf32_Ehdr");
       tid_t elf_phdr = import_type(ti, -1, "Elf32_Phdr");
-#endif
 
       unsigned char *buf = (unsigned char*)malloc(need);
       fread(buf, 1, need, f);
@@ -2107,13 +1883,9 @@ void initPebLdrData(unsigned int pebBase) {
    initListEntry(pebLdrData + 0x1C);  //InInitializationOrderModuleList
 
    char buf[260], *fname;
-#if (IDA_SDK_VERSION < 490)
-   fname = get_input_file_path();
-#else
 //   get_input_file_path(buf, sizeof(buf));
    get_root_filename(buf, sizeof(buf));
    fname = buf;
-#endif
 
 #ifdef DEBUG
    msg(PLUGIN_NAME": adding file to peb modules\n");
@@ -2235,12 +2007,7 @@ Buffer *makeLinuxEnv(const char *env[], const char *userName, const char *hostNa
 }
 
 //notification hook function for idb notifications
-#if IDA_SDK_VERSION >= 510      //HT_IDB introduced in SDK 510
-#if IDA_SDK_VERSION >= 700
 ssize_t idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
-#else
-int idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
-#endif
    if (notification_code == idb_event::byte_patched) {
       // A byte has been patched
       // in: ea_t ea
@@ -2251,19 +2018,11 @@ int idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
          unsigned int val = get_long(ea);
          segment_t *seg = getseg(val);
          if (seg) {
-#if IDA_SDK_VERSION >= 700
             qstring name;
             ssize_t s = get_nice_colored_name(&name, val, GNCN_NOCOLOR);
             if (s != 0) {
                set_cmt(ea, name.c_str(), false);
             }
-#else
-            char name[256];
-            ssize_t s = get_nice_colored_name(val, name, sizeof(name), GNCN_NOCOLOR);
-            if (s != 0) {
-               set_cmt(ea, name, false);
-            }
-#endif
          }
          else {
             set_cmt(ea, "", false);
@@ -2272,19 +2031,16 @@ int idaapi idb_hook(void * /*user_data*/, int notification_code, va_list va) {
    }
    return 0;
 }
-#endif
 
 void formatStack(unsigned int begin, unsigned int end) {
    while (begin < end) {
       do_data_ex(begin, dwrdflag(), 4, BADNODE);
       begin += 4;
    }
-#if IDA_SDK_VERSION >= 510      //HT_IDB introduced in SDK 510
    if (!idbHooked) {
       hook_to_notification_point(HT_IDB, idb_hook, NULL);
       idbHooked = true;
    }
-#endif
 }
 
 void createIdt(unsigned int idtBase, unsigned int idtLimit) {
@@ -2387,13 +2143,10 @@ unsigned int createWindowsPEB() {
 
    //WindowTitle
    char buf[260], *window;
-#if (IDA_SDK_VERSION < 490)
-   window = get_input_file_path();
-#else
 //   get_input_file_path(buf, sizeof(buf));
    get_root_filename(buf, sizeof(buf));
    window = buf;
-#endif
+
    unsigned int ulen = (unsigned int)strlen(window) + 1;
    unsigned int pWindow = HeapBase::getHeap()->malloc(ulen * 2);
    //copy desktop line to this location as WCHAR
@@ -2604,13 +2357,10 @@ void parseMainArgs() {
 
 void buildElfArgs() {
    char buf[260], *fname;
-#if (IDA_SDK_VERSION < 490)
-   fname = get_input_file_path();
-#else
 //   get_input_file_path(buf, sizeof(buf));
    get_root_filename(buf, sizeof(buf));
    fname = buf;
-#endif
+
    parseMainArgs();
    push(0, SIZE_BYTE);
    if (mainArgs) {
@@ -2634,13 +2384,10 @@ void buildElfArgs() {
 void buildElfEnvironment(unsigned int elf_base) {
    char buf[260], *fname;
    char path[260];
-#if (IDA_SDK_VERSION < 490)
-   fname = get_input_file_path();
-#else
 //   get_input_file_path(buf, sizeof(buf));
    get_root_filename(buf, sizeof(buf));
    fname = buf;
-#endif
+
    //build environment
    const char *userName = "test";
    const char *hostName = "localhost";
@@ -2829,11 +2576,7 @@ bool haveHeapSegment() {
 bool idaapi emu_init_common(void) {
    cpuInit = false;
 
-#if IDA_SDK_VERSION < 750
-   if (ph.id != PLFM_386) return false;
-#else
    if (PH.id != PLFM_386) return false;
-#endif
 
 //   msg(PLUGIN_NAME": hooking idp\n");
    hook_to_notification_point(HT_IDP, idpCallback, NULL);
@@ -2875,12 +2618,10 @@ void emu_term_common() {
       idpHooked = false;
       unhook_from_notification_point(HT_IDP, idpCallback, NULL);
    }
-#if IDA_SDK_VERSION >= 510      //HT_IDB introduced in SDK 510
    if (idbHooked) {
       idbHooked = false;
       unhook_from_notification_point(HT_IDB, idb_hook, NULL);
    }
-#endif
    clearFunctionInfoList();
    destroyEmulatorWindow();
    closeTrace();
@@ -2896,18 +2637,10 @@ bool emu_run_common(size_t /*arg*/) {
    if (!ok_to_run) {
       //need to wait for ui_ready_to_run
       wants_to_run = true;
-#if IDA_SDK_VERSION >= 700
       return true;
-#else
-      return;
-#endif
    }
 
-#if IDA_SDK_VERSION < 730
-   current_filetype = (filetype_t)inf.filetype;
-#else
    current_filetype = inf_get_filetype();
-#endif
 
    cacheMainWindowHandle();
 
@@ -2942,15 +2675,9 @@ bool emu_run_common(size_t /*arg*/) {
          GetSystemTimeAsFileTime(&baseTime);
          x86emu_node.create(x86emu_node_name);
 
-#if IDA_SDK_VERSION < 730
-         x86emu_node.altset(X86_ORIG_MINEA, inf.min_ea);
-         x86emu_node.altset(X86_MINEA, inf.min_ea);
-         x86emu_node.altset(X86_MAXEA, inf.max_ea);
-#else
          x86emu_node.altset(X86_ORIG_MINEA, inf_get_min_ea());
          x86emu_node.altset(X86_MINEA, inf_get_min_ea());
          x86emu_node.altset(X86_MAXEA, inf_get_max_ea());
-#endif
 
          segment_t *s = get_first_seg();
          if (s && (s->startEA & 0xFFF)) {
@@ -3022,11 +2749,7 @@ bool emu_run_common(size_t /*arg*/) {
             kernel_node.altset(OS_GDT_BASE, LINUX_GDT_BASE);
             kernel_node.altset(OS_GDT_LIMIT, LINUX_GDT_LIMIT);
 
-#if IDA_SDK_VERSION < 730
-            kernel_node.altset(OS_LINUX_BRK, inf.max_ea);
-#else
             kernel_node.altset(OS_LINUX_BRK, inf_get_max_ea());
-#endif
          }
          else if (current_filetype == f_CGC) {
             //need to allow this to be user selectable at some point
@@ -3176,17 +2899,12 @@ bool emu_run_common(size_t /*arg*/) {
 
       pCmdLineA = (unsigned int)x86emu_node.altval(EMU_COMMAND_LINE);
 
-#if IDA_SDK_VERSION >= 530
-#if IDA_SDK_VERSION >= 700
       TWidget *stackForm = open_disasm_window("Stack");
-#else
-      TForm *stackForm = open_disasm_window("Stack");
-#endif
       switchto_tform(stackForm, true);
       stackCC = get_current_viewer();
       mainForm = find_tform("IDA View-A");
       switchto_tform(mainForm, true);
-#endif
+
       if (!cpuInit) {
          cpu.eip = init_eip;
       }
@@ -3200,12 +2918,8 @@ bool emu_run_common(size_t /*arg*/) {
    }
    already_run = true;
    check_auto_cgc();
-#if IDA_SDK_VERSION >= 700
    return true;
-#endif
 }
-
-#if IDA_SDK_VERSION >= 750
 
 struct emu_plugmod_t : public plugmod_t {
   /// Invoke the plugin.
@@ -3234,72 +2948,6 @@ bool idaapi emu_plugmod_t::run(size_t arg) {
 
 #define emu_run NULL
 #define emu_term NULL
-
-#else
-/** support for IDA < 7.5 **/
-
-//make life easier in a post 7.5 world
-#define PLUGIN_MULTI 0
-
-//--------------------------------------------------------------------------
-//
-//      Initialize.
-//
-//      IDA will call this function only once.
-//      If this function returns PLGUIN_SKIP, IDA will never load it again.
-//      If this function returns PLUGIN_OK, IDA will unload the plugin but
-//      remember that the plugin agreed to work with the database.
-//      The plugin will be loaded again if the user invokes it by
-//      pressing the hotkey or selecting it from the menu.
-//      After the second load the plugin will stay on memory.
-//      If this function returns PLUGIN_KEEP, IDA will keep the plugin
-//      in the memory. In this case the initialization function can hook
-//      into the processor module and user interface notification points.
-//      See the hook_to_notification_point() function.
-//
-int idaapi emu_init(void) {
-   if (emu_init_common()) {
-      return PLUGIN_KEEP;
-   }
-   else {
-      return PLUGIN_SKIP;
-   }
-}
-
-//--------------------------------------------------------------------------
-//      Terminate.
-//
-//      IDA will call this function when the user asks to exit.
-//      This function won't be called in the case of emergency exits.
-
-void idaapi emu_term(void) {
-   emu_term_common();
-}
-
-//--------------------------------------------------------------------------
-//
-//      The plugin method
-//
-//      This is the main function of plugin.
-//
-//      It will be called when the user selects the plugin.
-//
-//              arg - the input argument, it can be specified in
-//                    plugins.cfg file. The default is zero.
-//
-//
-
-#if IDA_SDK_VERSION >= 700
-bool idaapi emu_run(size_t arg) {
-   return emu_run_common(arg);
-}
-#else
-void idaapi emu_run(int arg) {
-   emu_run_common(arg);
-}
-#endif
-
-#endif
 
 //--------------------------------------------------------------------------
 char comment[] = "This is an x86 emulator";
